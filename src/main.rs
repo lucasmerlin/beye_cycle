@@ -7,6 +7,7 @@
 mod bike;
 mod map;
 mod waypoint;
+mod slow;
 
 use crate::bike::spawn_player;
 use crate::map::spawn_map_system;
@@ -26,8 +27,8 @@ fn main() {
                 meta_check: AssetMetaCheck::Never,
                 ..default()
             }),
-            PhysicsPlugins::default().with_length_unit(20.0),
-            //PhysicsDebugPlugin::default(),
+            PhysicsPlugins::default().with_length_unit(1.0),
+           //PhysicsDebugPlugin::default(),
         ))
         .insert_resource(Gravity(Vec2::new(0.0, 0.0)))
         .add_systems(

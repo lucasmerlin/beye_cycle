@@ -22,3 +22,4 @@ avian2d = { version = "0.1", features = ["debug-plugin"] }
 svg = "0.17.0"
 itertools = "0.13.0"
 data-url = "0.3"
+lyon = "1"

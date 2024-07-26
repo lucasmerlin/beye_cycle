@@ -1,16 +1,19 @@
 use crate::waypoint::Waypoint;
 use avian2d::math::Vector;
-use avian2d::prelude::{Collider, RigidBody};
+use avian2d::prelude::{Collider, Position, RigidBody, Rotation, VhacdParameters};
 use bevy::asset::io::embedded::EmbeddedAssetRegistry;
 use bevy::prelude::*;
 use bevy::render::camera::ScalingMode;
 use itertools::Itertools;
+use lyon::tessellation::geometry_builder::{Positions, SimpleBuffersBuilder};
+use lyon::tessellation::{BuffersBuilder, FillOptions, FillVertex, VertexBuffers};
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
 use svg::node::element::tag;
 use svg::node::element::tag::Type;
 use svg::node::Value;
 use svg::parser::Event;
+use crate::slow::Slow;
 
 pub fn spawn_map_system(
     mut commands: Commands,
@@ -139,13 +142,60 @@ pub fn spawn_map_system(
                     .map(|s| s.split(' ').collect::<Vec<_>>())
                     .unwrap_or_default();
 
+                let mut buffers = VertexBuffers::new();
+
+                let mut builder = SimpleBuffersBuilder::new(&mut buffers, Positions);
+
+                let mut tessellator = lyon::tessellation::FillTessellator::new();
+                let fill_options = FillOptions::default();
+                let mut builder = tessellator.builder(&fill_options, &mut builder);
+                points
+                    .iter()
+                    .map(|(x, y)| lyon::math::Point::new(*x, *y))
+                    .enumerate()
+                    .for_each(|(i, p)| {
+                        if i == 0 {
+                            builder.begin(p);
+                        } else {
+                            builder.line_to(p);
+                        }
+                    });
+
+                builder.end(true);
+                builder.build().unwrap();
+
+                let collider = Collider::compound(
+                    buffers
+                        .indices
+                        .iter()
+                        .tuples()
+                        .map(|(i, j, k)| {
+                            (
+                                Position::default(),
+                                Rotation::default(),
+                                Collider::triangle(
+                                    Vector::new(
+                                        buffers.vertices[*i as usize].x,
+                                        buffers.vertices[*i as usize].y,
+                                    ),
+                                    Vector::new(
+                                        buffers.vertices[*j as usize].x,
+                                        buffers.vertices[*j as usize].y,
+                                    ),
+                                    Vector::new(
+                                        buffers.vertices[*k as usize].x,
+                                        buffers.vertices[*k as usize].y,
+                                    ),
+                                ),
+                            )
+                        })
+                        .collect::<Vec<_>>(),
+                );
+
                 if classes.contains(&"collider") {
-                    commands.spawn((
-                        RigidBody::Static,
-                        Collider::convex_hull(
-                            points.iter().map(|(x, y)| Vector::new(*x, *y)).collect(),
-                        ).unwrap(),
-                    ));
+                    commands.spawn((RigidBody::Static, collider));
+                } else if classes.contains(&"slow") {
+                    commands.spawn( (collider, Slow));
                 }
             }
             _ => {}

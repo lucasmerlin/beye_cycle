@@ -1,4 +1,6 @@
+use crate::slow::Slow;
 use crate::waypoint::{Waypoint, WaypointAi};
+use avian2d::math::Vector;
 use avian2d::prelude::*;
 use bevy::prelude::*;
 use std::f32::consts::PI;
@@ -19,6 +21,9 @@ pub fn spawn_player(
     let (next_waypoint_entity, next_waypoint, next_waypoint_transfrom) =
         waypoint.get(first_waypoint.next.unwrap()).unwrap();
 
+
+    let direction = -(next_waypoint_transfrom.translation - start_post.translation).xy();
+
     let mut spawn = |player: bool, offset: Vec2| {
         let mut entity = commands.spawn((
             Bicycle,
@@ -37,7 +42,8 @@ pub fn spawn_player(
             ExternalForce::default(),
             TransformBundle {
                 local: start_post.clone()
-                    * Transform::from_translation(Vec3::new(offset.x, offset.y, 0.0)),
+                    * Transform::from_translation(Vec3::new(offset.x, offset.y, 0.0))
+                    * Transform::from_rotation(Quat::from_rotation_z(direction.angle_between(Vec2::Y))),
                 ..Default::default()
             },
             LinearDamping::default(),
@@ -71,11 +77,11 @@ pub fn spawn_player(
 
     spawn(true, Vec2::new(0.0, 0.0));
 
-    let direction = -(next_waypoint_transfrom.translation - start_post.translation).xy();
+    let direction_right = direction.normalize().rotate(Vec2::from_angle(PI / 2.0));
 
     // Places enemies in a F1 like  grid
-    for i in 0..5 {
-        let offset = direction.normalize() * (i as f32 * 2.0);
+    for i in 0..50 {
+        let offset = direction.normalize() * (i as f32 * 2.0) + direction_right * (i as f32 % 2.0);
         spawn(false, offset);
     }
 }
@@ -103,20 +109,49 @@ pub fn car_controller_system(
         &mut ExternalForce,
         &mut LinearDamping,
     )>,
+    spatial_query: SpatialQuery,
+    mut slow_query: Query<(&Slow)>,
 ) {
     for (control, params, velocity, mut transform, mut ext_force, mut damping) in query.iter_mut() {
         ext_force.clear();
+
+        let intersections = spatial_query.point_intersections(
+            Vector::new(transform.translation.x, transform.translation.y),
+            SpatialQueryFilter::default(),
+        );
+        let slow = intersections
+            .iter()
+            .any(|entity| slow_query.get(*entity).is_ok());
+
+        let max_speed = if slow {
+            params.max_speed * 0.5
+        } else {
+            params.max_speed
+        };
+        let acceleration = if slow {
+            params.acceleration * 0.5
+        } else {
+            params.acceleration
+        };
 
         let bike_forward = (transform.rotation * Vec3::Y).xy();
 
         let forward_velocity = velocity.dot(bike_forward);
 
-        if forward_velocity < params.max_speed && forward_velocity > -params.max_speed * 0.3 {
-            let acceleration_clamped = control.acceleration.clamp(-1.0, 1.0);
-            let acceleration = acceleration_clamped * params.acceleration;
-            let current_rotation = transform.rotation * Vec3::Y;
-            ext_force.apply_force(Vec2::new(acceleration, 0.0).rotate(current_rotation.xy()));
+        let slower_than_max_speed =
+            forward_velocity < max_speed && forward_velocity > -max_speed * 0.5;
+
+        let mut control_acceleration_clamped = control.acceleration.clamp(-1.0, 1.0);
+
+        if !slower_than_max_speed && slow {
+            control_acceleration_clamped = -0.8;
+        } else if !slower_than_max_speed {
+            control_acceleration_clamped = 0.0;
         }
+
+        let acceleration = control_acceleration_clamped * acceleration;
+        let current_rotation = transform.rotation * Vec3::Y;
+        ext_force.apply_force(Vec2::new(acceleration, 0.0).rotate(current_rotation.xy()));
 
         let slow_turn_factor = (forward_velocity / 8.0).clamp(-1.0, 1.0);
         let turn_clamped = control.turn.clamp(-1.0, 1.0);
@@ -127,6 +162,10 @@ pub fn car_controller_system(
             **damping = FloatExt::lerp(**damping, 3.0, 0.01);
         } else {
             damping.0 = 0.0;
+        }
+
+        if slow {
+            damping.0 *= 1.2;
         }
     }
 }
