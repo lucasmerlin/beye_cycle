@@ -8,26 +8,45 @@ mod bike;
 mod map;
 mod waypoint;
 
-use avian2d::PhysicsPlugins;
+use crate::bike::spawn_player;
+use crate::map::spawn_map_system;
 use avian2d::prelude::{Gravity, PhysicsDebugPlugin};
+use avian2d::PhysicsPlugins;
 use bevy::asset::AssetMetaCheck;
 use bevy::prelude::*;
 use bevy::render::camera::ScalingMode;
-use crate::bike::{spawn_player};
-use crate::map::spawn_map_system;
 
 fn main() {
     App::new()
-        .add_plugins((DefaultPlugins.set(AssetPlugin {
-            // Wasm builds will check for meta files (that don't exist) if this isn't set.
-            // This causes errors and even panics in web builds on itch.
-            // See https://github.com/bevyengine/bevy_github_ci_template/issues/48.
-            meta_check: AssetMetaCheck::Never,
-            ..default()
-        }), PhysicsPlugins::default().with_length_unit(20.0), PhysicsDebugPlugin::default()))
+        .add_plugins((
+            DefaultPlugins.set(AssetPlugin {
+                // Wasm builds will check for meta files (that don't exist) if this isn't set.
+                // This causes errors and even panics in web builds on itch.
+                // See https://github.com/bevyengine/bevy_github_ci_template/issues/48.
+                meta_check: AssetMetaCheck::Never,
+                ..default()
+            }),
+            PhysicsPlugins::default().with_length_unit(20.0),
+            //PhysicsDebugPlugin::default(),
+        ))
         .insert_resource(Gravity(Vec2::new(0.0, 0.0)))
-        .add_systems(Startup, (setup, spawn_player, spawn_map_system))
-        .add_systems(Update, (bike::control_player, bike::drift_factor_system, bike::car_controller_system))
+        .add_systems(
+            Startup,
+            (
+                setup,
+                spawn_player.after(spawn_map_system),
+                spawn_map_system,
+            ),
+        )
+        .add_systems(
+            Update,
+            (
+                bike::control_player,
+                bike::drift_factor_system,
+                bike::car_controller_system,
+                waypoint::follow_waypoint,
+            ),
+        )
         .run();
 }
 

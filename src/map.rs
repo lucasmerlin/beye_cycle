@@ -45,7 +45,6 @@ pub fn spawn_map_system(
             }
             Event::Tag(tag::Image, _, attrs) => {
                 if let Some(href) = attrs.get("xlink:href") {
-                    println!("Loading image: {}", href);
                     let data = data_url::DataUrl::process(href).unwrap();
                     let (vec, meta) = data.decode_to_vec().unwrap();
 
@@ -101,6 +100,7 @@ pub fn spawn_map_system(
                     })
                     .collect();
 
+                let mut first = None;
                 let mut prev = None;
 
                 if attrs.get("id").map(Deref::deref) == Some("track") {
@@ -114,6 +114,10 @@ pub fn spawn_map_system(
                             VisibilityBundle::default(),
                         ));
 
+                        if first.is_none() {
+                            first = Some(entity.id());
+                        }
+
                         entity.with_children(|commands| {
                             commands.spawn((SpriteBundle {
                                 texture: asset_server.load("ducky.png"),
@@ -124,6 +128,10 @@ pub fn spawn_map_system(
 
                         prev = Some(entity.id());
                     }
+                }
+
+                if let Some(first) = first {
+                    commands.entity(first).insert(Waypoint { next: prev });
                 }
 
                 let class = attrs.get("class").map(Deref::deref);

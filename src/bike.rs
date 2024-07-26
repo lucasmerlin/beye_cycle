@@ -1,3 +1,4 @@
+use crate::waypoint::{Waypoint, WaypointAi};
 use avian2d::prelude::*;
 use bevy::prelude::*;
 use std::f32::consts::PI;
@@ -8,58 +9,81 @@ pub struct Bicycle;
 #[derive(Component, Debug)]
 pub struct Player;
 
-pub fn spawn_player(mut commands: Commands, mut asset_server: ResMut<AssetServer>) {
-    let mut entity = commands.spawn((
-        Player,
-        Bicycle,
-        BicycleControl {
-            turn: 0.0,
-            acceleration: 0.0,
-        },
-        BicycleParams {
-            max_speed: 20.0,
-            acceleration: 15.0,
-            turn: 0.02,
-            drift: 0.95,
-        },
-        RigidBody::Dynamic,
-        Collider::rectangle(0.2, 2.0),
-        ExternalForce::default(),
-        TransformBundle::default(),
-        LinearDamping::default(),
-        AngularDamping(10.0),
-    ));
+pub fn spawn_player(
+    mut commands: Commands,
+    mut asset_server: ResMut<AssetServer>,
+    waypoint: Query<(Entity, &Waypoint, &Transform)>,
+) {
+    let (first_waypoint_entity, first_waypoint, start_post) = waypoint.iter().next().unwrap();
 
-    entity.with_children(|commands| {
-        let mut transform = Transform::from_scale(Vec3::splat(1.0));
-        transform.rotation = Quat::from_rotation_z(PI / 2.0);
-        commands.spawn(
-            (SpriteBundle {
-                texture: asset_server.load("bike.png"),
-                transform,
-                sprite: Sprite {
-                    custom_size: Some(Vec2::new(2.0, 1.5)),
-                    ..Default::default()
-                },
+    let (next_waypoint_entity, next_waypoint, next_waypoint_transfrom) =
+        waypoint.get(first_waypoint.next.unwrap()).unwrap();
+
+    let mut spawn = |player: bool, offset: Vec2| {
+        let mut entity = commands.spawn((
+            Bicycle,
+            BicycleControl {
+                turn: 0.0,
+                acceleration: 1.0,
+            },
+            BicycleParams {
+                max_speed: 20.0,
+                acceleration: 15.0,
+                turn: 0.02,
+                drift: 0.95,
+            },
+            RigidBody::Dynamic,
+            Collider::rectangle(0.2, 2.0),
+            ExternalForce::default(),
+            TransformBundle {
+                local: start_post.clone()
+                    * Transform::from_translation(Vec3::new(offset.x, offset.y, 0.0)),
                 ..Default::default()
-            }),
-        );
-    });
+            },
+            LinearDamping::default(),
+            AngularDamping(10.0),
+        ));
 
-    commands.spawn((
-        RigidBody::Dynamic,
-        Collider::rectangle(0.2, 2.0),
-        ExternalForce::default(),
-        TransformBundle::default(),
-        LinearDamping(10.0),
-        AngularDamping(10.0),
-    ));
+        if player {
+            entity.insert(Player);
+        } else {
+            entity.insert(WaypointAi {
+                current_target: first_waypoint_entity,
+            });
+        }
+
+        entity.with_children(|commands| {
+            let mut transform = Transform::from_scale(Vec3::splat(1.0));
+            transform.rotation = Quat::from_rotation_z(PI / 2.0);
+            commands.spawn(
+                (SpriteBundle {
+                    texture: asset_server.load("bike.png"),
+                    transform,
+                    sprite: Sprite {
+                        custom_size: Some(Vec2::new(2.0, 1.5)),
+                        ..Default::default()
+                    },
+                    ..Default::default()
+                }),
+            );
+        });
+    };
+
+    spawn(true, Vec2::new(0.0, 0.0));
+
+    let direction = -(next_waypoint_transfrom.translation - start_post.translation).xy();
+
+    // Places enemies in a F1 like  grid
+    for i in 0..5 {
+        let offset = direction.normalize() * (i as f32 * 2.0);
+        spawn(false, offset);
+    }
 }
 
 #[derive(Component, Debug)]
 pub struct BicycleControl {
-    acceleration: f32,
-    turn: f32,
+    pub(crate) acceleration: f32,
+    pub(crate) turn: f32,
 }
 
 #[derive(Component, Debug)]
@@ -88,13 +112,15 @@ pub fn car_controller_system(
         let forward_velocity = velocity.dot(bike_forward);
 
         if forward_velocity < params.max_speed && forward_velocity > -params.max_speed * 0.3 {
-            let acceleration = control.acceleration * params.acceleration;
+            let acceleration_clamped = control.acceleration.clamp(-1.0, 1.0);
+            let acceleration = acceleration_clamped * params.acceleration;
             let current_rotation = transform.rotation * Vec3::Y;
             ext_force.apply_force(Vec2::new(acceleration, 0.0).rotate(current_rotation.xy()));
         }
 
         let slow_turn_factor = (forward_velocity / 8.0).clamp(-1.0, 1.0);
-        let turn = control.turn * params.turn * slow_turn_factor;
+        let turn_clamped = control.turn.clamp(-1.0, 1.0);
+        let turn = turn_clamped * params.turn * slow_turn_factor;
         transform.rotate_z(turn);
 
         if control.acceleration == 0.0 {
