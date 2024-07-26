@@ -1,4 +1,6 @@
 use crate::waypoint::Waypoint;
+use avian2d::math::Vector;
+use avian2d::prelude::{Collider, RigidBody};
 use bevy::asset::io::embedded::EmbeddedAssetRegistry;
 use bevy::prelude::*;
 use bevy::render::camera::ScalingMode;
@@ -102,11 +104,11 @@ pub fn spawn_map_system(
                 let mut prev = None;
 
                 if attrs.get("id").map(Deref::deref) == Some("track") {
-                    for (x, y) in points.into_iter().rev() {
+                    for (x, y) in points.iter().rev() {
                         let mut entity = commands.spawn((
                             Waypoint { next: prev },
                             TransformBundle {
-                                local: Transform::from_translation(Vec3::new(x, y, 0.0)),
+                                local: Transform::from_translation(Vec3::new(*x, *y, 0.0)),
                                 ..Default::default()
                             },
                             VisibilityBundle::default(),
@@ -122,6 +124,20 @@ pub fn spawn_map_system(
 
                         prev = Some(entity.id());
                     }
+                }
+
+                let class = attrs.get("class").map(Deref::deref);
+                let classes = class
+                    .map(|s| s.split(' ').collect::<Vec<_>>())
+                    .unwrap_or_default();
+
+                if classes.contains(&"collider") {
+                    commands.spawn((
+                        RigidBody::Static,
+                        Collider::convex_hull(
+                            points.iter().map(|(x, y)| Vector::new(*x, *y)).collect(),
+                        ).unwrap(),
+                    ));
                 }
             }
             _ => {}

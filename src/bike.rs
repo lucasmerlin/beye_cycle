@@ -1,6 +1,6 @@
-use std::f32::consts::PI;
 use avian2d::prelude::*;
 use bevy::prelude::*;
+use std::f32::consts::PI;
 
 #[derive(Component, Debug)]
 pub struct Bicycle;
@@ -31,15 +31,19 @@ pub fn spawn_player(mut commands: Commands, mut asset_server: ResMut<AssetServer
     ));
 
     entity.with_children(|commands| {
-        let mut transform = Transform::from_scale(Vec3::splat(1.0 / 20.0));
+        let mut transform = Transform::from_scale(Vec3::splat(1.0));
         transform.rotation = Quat::from_rotation_z(PI / 2.0);
-        commands.spawn((
-            SpriteBundle {
+        commands.spawn(
+            (SpriteBundle {
                 texture: asset_server.load("bike.png"),
                 transform,
+                sprite: Sprite {
+                    custom_size: Some(Vec2::new(2.0, 1.5)),
+                    ..Default::default()
+                },
                 ..Default::default()
-            }
-        ));
+            }),
+        );
     });
 
     commands.spawn((
@@ -66,9 +70,15 @@ pub struct BicycleParams {
     drift: f32,
 }
 
-
 pub fn car_controller_system(
-    mut query: Query<(&BicycleControl, &BicycleParams, &LinearVelocity, &mut Transform, &mut ExternalForce, &mut LinearDamping)>,
+    mut query: Query<(
+        &BicycleControl,
+        &BicycleParams,
+        &LinearVelocity,
+        &mut Transform,
+        &mut ExternalForce,
+        &mut LinearDamping,
+    )>,
 ) {
     for (control, params, velocity, mut transform, mut ext_force, mut damping) in query.iter_mut() {
         ext_force.clear();
@@ -83,11 +93,9 @@ pub fn car_controller_system(
             ext_force.apply_force(Vec2::new(acceleration, 0.0).rotate(current_rotation.xy()));
         }
 
-
         let slow_turn_factor = (forward_velocity / 8.0).clamp(-1.0, 1.0);
         let turn = control.turn * params.turn * slow_turn_factor;
         transform.rotate_z(turn);
-
 
         if control.acceleration == 0.0 {
             **damping = FloatExt::lerp(**damping, 3.0, 0.01);
@@ -98,9 +106,7 @@ pub fn car_controller_system(
 }
 
 /// Basically kills the orthogonal velocity of the bike, as explained here: https://youtu.be/DVHcOS1E5OQ?si=UgpKyHxYqsRehCeZ&t=559
-pub fn drift_factor_system(
-    mut query: Query<(&mut LinearVelocity, &Transform, &BicycleParams)>,
-) {
+pub fn drift_factor_system(mut query: Query<(&mut LinearVelocity, &Transform, &BicycleParams)>) {
     for (mut lin_vel, transform, params) in query.iter_mut() {
         let drift = params.drift;
 
