@@ -6,6 +6,7 @@
 
 mod bike;
 mod map;
+mod waypoint;
 
 use avian2d::PhysicsPlugins;
 use avian2d::prelude::{Gravity, PhysicsDebugPlugin};
@@ -31,15 +32,15 @@ fn main() {
 }
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let mut camera = Camera2dBundle::default();
-
-    // camera.transform.scale = Vec3::splat(1.0 / 20.0);
-    camera.projection.scaling_mode = ScalingMode::AutoMin {
-        min_height: 80.0,
-        min_width: 80.0,
-    };
-
-    commands.spawn(camera);
+    // let mut camera = Camera2dBundle::default();
+    //
+    // // camera.transform.scale = Vec3::splat(1.0 / 20.0);
+    // camera.projection.scaling_mode = ScalingMode::AutoMin {
+    //     min_height: 80.0,
+    //     min_width: 80.0,
+    // };
+    //
+    // commands.spawn(camera);
     // commands.spawn(SpriteBundle {
     //     texture: asset_server.load("ducky.png"),
     //     ..Default::default()

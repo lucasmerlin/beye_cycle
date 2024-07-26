@@ -18,3 +18,7 @@ opt-level = 3
 [dependencies]
 bevy = { version = "0.14", features = ["jpeg"] }
 avian2d = { version = "0.1", features = ["debug-plugin"] }
+
+svg = "0.17.0"
+itertools = "0.13.0"
+data-url = "0.3"
