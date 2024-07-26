@@ -5,12 +5,15 @@
 #![allow(clippy::too_many_arguments, clippy::type_complexity)]
 
 mod bike;
+mod map;
 
 use avian2d::PhysicsPlugins;
 use avian2d::prelude::{Gravity, PhysicsDebugPlugin};
 use bevy::asset::AssetMetaCheck;
 use bevy::prelude::*;
+use bevy::render::camera::ScalingMode;
 use crate::bike::{spawn_player};
+use crate::map::spawn_map_system;
 
 fn main() {
     App::new()
@@ -22,7 +25,7 @@ fn main() {
             ..default()
         }), PhysicsPlugins::default().with_length_unit(20.0), PhysicsDebugPlugin::default()))
         .insert_resource(Gravity(Vec2::new(0.0, 0.0)))
-        .add_systems(Startup, (setup, spawn_player))
+        .add_systems(Startup, (setup, spawn_player, spawn_map_system))
         .add_systems(Update, (bike::control_player, bike::drift_factor_system, bike::car_controller_system))
         .run();
 }
@@ -30,7 +33,11 @@ fn main() {
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let mut camera = Camera2dBundle::default();
 
-    camera.transform.scale = Vec3::splat(1.0 / 20.0);
+    // camera.transform.scale = Vec3::splat(1.0 / 20.0);
+    camera.projection.scaling_mode = ScalingMode::AutoMin {
+        min_height: 80.0,
+        min_width: 80.0,
+    };
 
     commands.spawn(camera);
     // commands.spawn(SpriteBundle {

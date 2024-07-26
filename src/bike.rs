@@ -1,3 +1,4 @@
+use std::f32::consts::PI;
 use avian2d::prelude::*;
 use bevy::prelude::*;
 
@@ -7,8 +8,8 @@ pub struct Bicycle;
 #[derive(Component, Debug)]
 pub struct Player;
 
-pub fn spawn_player(mut commands: Commands) {
-    commands.spawn((
+pub fn spawn_player(mut commands: Commands, mut asset_server: ResMut<AssetServer>) {
+    let mut entity = commands.spawn((
         Player,
         Bicycle,
         BicycleControl {
@@ -28,6 +29,19 @@ pub fn spawn_player(mut commands: Commands) {
         LinearDamping::default(),
         AngularDamping(10.0),
     ));
+
+    entity.with_children(|commands| {
+        let mut transform = Transform::from_scale(Vec3::splat(1.0 / 20.0));
+        transform.rotation = Quat::from_rotation_z(PI / 2.0);
+        commands.spawn((
+            SpriteBundle {
+                texture: asset_server.load("bike.png"),
+                transform,
+                ..Default::default()
+            }
+        ));
+    });
+
     commands.spawn((
         RigidBody::Dynamic,
         Collider::rectangle(0.2, 2.0),
@@ -71,7 +85,6 @@ pub fn car_controller_system(
 
 
         let slow_turn_factor = (forward_velocity / 8.0).clamp(-1.0, 1.0);
-        dbg!(slow_turn_factor, forward_velocity);
         let turn = control.turn * params.turn * slow_turn_factor;
         transform.rotate_z(turn);
 
