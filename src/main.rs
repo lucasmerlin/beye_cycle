@@ -8,10 +8,11 @@ mod bike;
 mod map;
 mod waypoint;
 mod slow;
+mod camera;
 
 use crate::bike::spawn_player;
 use crate::map::spawn_map_system;
-use avian2d::prelude::{Gravity, PhysicsDebugPlugin};
+use avian2d::prelude::{Gravity, PhysicsDebugPlugin, PhysicsSet};
 use avian2d::PhysicsPlugins;
 use bevy::asset::AssetMetaCheck;
 use bevy::prelude::*;
@@ -47,6 +48,12 @@ fn main() {
                 bike::car_controller_system,
                 waypoint::follow_waypoint,
             ),
+        )
+        .add_systems(
+            PostUpdate,
+            camera::update_camera
+                .after(PhysicsSet::Sync)
+                .before(TransformSystem::TransformPropagate),
         )
         .run();
 }

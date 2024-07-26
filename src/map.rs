@@ -82,9 +82,10 @@ pub fn spawn_map_system(
                         transform: center,
                         ..Default::default()
                     };
+                    let camera_scale = 1.0 / 2.0;
                     camera.projection.scaling_mode = ScalingMode::AutoMin {
-                        min_width: width,
-                        min_height: height,
+                        min_width: width * camera_scale,
+                        min_height: height * camera_scale,
                     };
                     commands.spawn((camera,));
                 }

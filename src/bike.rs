@@ -24,6 +24,8 @@ pub fn spawn_player(
 
     let direction = -(next_waypoint_transfrom.translation - start_post.translation).xy();
 
+    let bicycle_length = 6.0;
+
     let mut spawn = |player: bool, offset: Vec2| {
         let mut entity = commands.spawn((
             Bicycle,
@@ -38,7 +40,7 @@ pub fn spawn_player(
                 drift: 0.95,
             },
             RigidBody::Dynamic,
-            Collider::rectangle(0.2, 2.0),
+            Collider::rectangle(bicycle_length / 10.0, bicycle_length),
             ExternalForce::default(),
             TransformBundle {
                 local: start_post.clone()
@@ -66,7 +68,7 @@ pub fn spawn_player(
                     texture: asset_server.load("bike.png"),
                     transform,
                     sprite: Sprite {
-                        custom_size: Some(Vec2::new(2.0, 1.5)),
+                        custom_size: Some(Vec2::new(bicycle_length, bicycle_length * 0.75)),
                         ..Default::default()
                     },
                     ..Default::default()
@@ -80,7 +82,7 @@ pub fn spawn_player(
     let direction_right = direction.normalize().rotate(Vec2::from_angle(PI / 2.0));
 
     // Places enemies in a F1 like  grid
-    for i in 0..50 {
+    for i in 0..4 {
         let offset = direction.normalize() * (i as f32 * 2.0) + direction_right * (i as f32 % 2.0);
         spawn(false, offset);
     }
