@@ -17,9 +17,19 @@ opt-level = 3
 
 [dependencies]
 bevy = { version = "0.14", features = ["jpeg"] }
-avian2d = { version = "0.1", features = ["debug-plugin"] }
+
+# We need the git version since in 0.1 there is a bug that causes the game to crash sometimes
+avian2d = { version = "0.1", git = "https://github.com/Jondolf/avian", features = ["debug-plugin"] }
 
 svg = "0.17.0"
 itertools = "0.13.0"
 data-url = "0.3"
 lyon = "1"
+
+bevy_egui = "0.28.0"
+bevy-inspector-egui = "0.25.1"
+egui_extras = "0.28.1"
+enum-iterator = { version = "2" }
+
+rand = "0.8"
+rand_derive2 = "0.1"

@@ -1,9 +1,17 @@
+use std::any::Any;
+use crate::bike_config::{BicycleModTrait, BikeConfig, CharacterConfig, PlayerConfig, Selectable};
 use crate::slow::Slow;
 use crate::waypoint::{Waypoint, WaypointAi};
 use avian2d::math::Vector;
 use avian2d::prelude::*;
+use bevy::ecs::system::EntityCommands;
 use bevy::prelude::*;
+use rand::random;
 use std::f32::consts::PI;
+use bevy_egui::egui;
+use bevy_egui::egui::{Id, Ui};
+use bevy_inspector_egui::inspector_egui_impls::InspectorPrimitive;
+use bevy_inspector_egui::reflect_inspector::InspectorUi;
 
 #[derive(Component, Debug)]
 pub struct Bicycle;
@@ -13,7 +21,8 @@ pub struct Player;
 
 pub fn spawn_player(
     mut commands: Commands,
-    mut asset_server: ResMut<AssetServer>,
+    asset_server: Res<AssetServer>,
+    player_config: Res<PlayerConfig>,
     waypoint: Query<(Entity, &Waypoint, &Transform)>,
 ) {
     let (first_waypoint_entity, first_waypoint, start_post) = waypoint.iter().next().unwrap();
@@ -21,60 +30,49 @@ pub fn spawn_player(
     let (next_waypoint_entity, next_waypoint, next_waypoint_transfrom) =
         waypoint.get(first_waypoint.next.unwrap()).unwrap();
 
-
     let direction = -(next_waypoint_transfrom.translation - start_post.translation).xy();
 
-    let bicycle_length = 6.0;
-
     let mut spawn = |player: bool, offset: Vec2| {
-        let mut entity = commands.spawn((
-            Bicycle,
-            BicycleControl {
-                turn: 0.0,
-                acceleration: 1.0,
-            },
-            BicycleParams {
-                max_speed: 20.0,
-                acceleration: 15.0,
-                turn: 0.02,
-                drift: 0.95,
-            },
-            RigidBody::Dynamic,
-            Collider::rectangle(bicycle_length / 10.0, bicycle_length),
-            ExternalForce::default(),
-            TransformBundle {
-                local: start_post.clone()
-                    * Transform::from_translation(Vec3::new(offset.x, offset.y, 0.0))
-                    * Transform::from_rotation(Quat::from_rotation_z(direction.angle_between(Vec2::Y))),
-                ..Default::default()
-            },
-            LinearDamping::default(),
-            AngularDamping(10.0),
-        ));
+        let id = {
+            let mut entity = commands.spawn((
+                Name::new(if player { "Player" } else { "Bot" }),
+                Bicycle,
+                BicycleControl {
+                    turn: 0.0,
+                    acceleration: 1.0,
+                },
+                RigidBody::Dynamic,
+                VisibilityBundle::default(),
+                Collider::rectangle(GAME_BICYCLE_LENGTH / 10.0, GAME_BICYCLE_LENGTH),
+                // This was just the initial size I chose when first testing bike params
+                Mass(0.2 * 2.0),
+                ExternalForce::default(),
+                TransformBundle {
+                    local: start_post.clone()
+                        * Transform::from_translation(Vec3::new(offset.x, offset.y, 0.0))
+                        * Transform::from_rotation(Quat::from_rotation_z(
+                            direction.angle_between(Vec2::Y),
+                        )),
+                    ..Default::default()
+                },
+                LinearDamping::default(),
+                AngularDamping(10.0),
+            ));
+            if player {
+                entity.insert(Player);
+            } else {
+                entity.insert(WaypointAi {
+                    current_target: first_waypoint_entity,
+                });
+            }
+            entity.id()
+        };
 
         if player {
-            entity.insert(Player);
+            apply_config(&mut commands, id, &player_config.0, &asset_server);
         } else {
-            entity.insert(WaypointAi {
-                current_target: first_waypoint_entity,
-            });
+            apply_config(&mut commands, id, &random(), &asset_server);
         }
-
-        entity.with_children(|commands| {
-            let mut transform = Transform::from_scale(Vec3::splat(1.0));
-            transform.rotation = Quat::from_rotation_z(PI / 2.0);
-            commands.spawn(
-                (SpriteBundle {
-                    texture: asset_server.load("bike.png"),
-                    transform,
-                    sprite: Sprite {
-                        custom_size: Some(Vec2::new(bicycle_length, bicycle_length * 0.75)),
-                        ..Default::default()
-                    },
-                    ..Default::default()
-                }),
-            );
-        });
     };
 
     spawn(true, Vec2::new(0.0, 0.0));
@@ -82,10 +80,94 @@ pub fn spawn_player(
     let direction_right = direction.normalize().rotate(Vec2::from_angle(PI / 2.0));
 
     // Places enemies in a F1 like  grid
-    for i in 0..4 {
+    for i in 0..10 {
         let offset = direction.normalize() * (i as f32 * 2.0) + direction_right * (i as f32 % 2.0);
         spawn(false, offset);
     }
+}
+
+pub const TEXTURE_BICYCLE_LENGTH: f32 = 1250.0;
+pub const GAME_BICYCLE_LENGTH: f32 = 2.0;
+
+pub fn apply_config_to_player(
+    mut commands: Commands,
+    mut query: Query<(Entity, &mut BicycleParams), With<Player>>,
+    config: Res<PlayerConfig>,
+    assets: Res<AssetServer>,
+) {
+    println!("apply_config_to_player");
+
+    let (player, params) = query.iter_mut().next().unwrap();
+
+    apply_config(&mut commands, player, &config.0, &assets);
+}
+
+pub fn apply_config(
+    commands: &mut Commands,
+    entity: Entity,
+    config: &CharacterConfig,
+    assets: &Res<AssetServer>,
+) {
+    let mut entity_commands = commands.entity(entity);
+
+    entity_commands.insert(BicycleParams::default() * config.bike.frame.params());
+
+    entity_commands.clear_children();
+
+    spawn_selectable(&mut entity_commands, &config.bike.frame, &assets);
+
+    spawn_selectable(&mut entity_commands, &config.bike.rear_wheel, &assets);
+
+    spawn_selectable(&mut entity_commands, &config.bike.addon, &assets);
+
+    spawn_selectable(&mut entity_commands, &config.skin, &assets);
+}
+
+fn spawn_selectable(
+    commands: &mut EntityCommands,
+    selectable: &impl BicycleModTrait,
+    assets: &Res<AssetServer>,
+) {
+    let texture_res = selectable.asset_res();
+    let offset = selectable.asset_offset();
+    let z_order = selectable.z_order();
+    let aspect = texture_res.x / texture_res.y;
+    let game_length = texture_res.x / TEXTURE_BICYCLE_LENGTH * GAME_BICYCLE_LENGTH;
+    let game_size = Vec2::new(game_length, game_length / aspect);
+
+    let rotation = Quat::from_rotation_z(PI / 2.0);
+
+    commands.with_children(|commands| {
+        if let Some(asset) = selectable.asset() {
+            commands.spawn(
+                (SpriteBundle {
+                    texture: assets.load(asset),
+                    transform: Transform::from_translation(Vec3::new(offset.x, offset.y, z_order))
+                        * Transform::from_rotation(rotation),
+                    sprite: Sprite {
+                        custom_size: Some(game_size),
+                        ..Default::default()
+                    },
+                    ..Default::default()
+                }),
+            );
+        }
+
+        if let Some(bg) = selectable.bg_asset() {
+            commands.spawn(
+                (SpriteBundle {
+                    texture: assets.load(bg),
+                    transform: Transform::from_translation(Vec3::new(offset.x, offset.y, 1.0))
+                        * Transform::from_rotation(rotation),
+                    sprite: Sprite {
+                        custom_size: Some(game_size),
+                        ..Default::default()
+                    },
+                    ..Default::default()
+                }),
+            );
+        }
+    });
 }
 
 #[derive(Component, Debug)]
@@ -94,15 +176,77 @@ pub struct BicycleControl {
     pub(crate) turn: f32,
 }
 
-#[derive(Component, Debug)]
+#[derive(Component, Debug, Reflect)]
 pub struct BicycleParams {
-    acceleration: f32,
-    max_speed: f32,
-    turn: f32,
-    drift: f32,
+    pub acceleration: f32,
+    pub max_speed: f32,
+    pub turn: f32,
+    // The lower, the driftier
+    pub drift: f32,
 }
 
-pub fn car_controller_system(
+pub const DEFAULT_MAX_SPEED: f32 = 5.0;
+
+impl Default for BicycleParams {
+    fn default() -> Self {
+        Self {
+            max_speed: DEFAULT_MAX_SPEED,
+            acceleration: 25.0,
+            turn: 0.02,
+            drift: 1.0,
+        }
+    }
+}
+
+impl std::ops::Mul<BicycleParams> for BicycleParams {
+    type Output = Self;
+
+    fn mul(self, rhs: BicycleParams) -> Self::Output {
+        Self {
+            max_speed: self.max_speed * rhs.max_speed,
+            acceleration: self.acceleration * rhs.acceleration,
+            turn: self.turn * rhs.turn,
+            drift: self.drift * rhs.drift,
+        }
+    }
+}
+
+impl InspectorPrimitive for BicycleParams {
+    fn ui(&mut self, ui: &mut Ui, options: &dyn Any, id: Id, env: InspectorUi<'_, '_>) -> bool {
+
+        ui.label("Max Speed");
+        ui.add(
+            egui::Slider::new(&mut self.max_speed, 0.0..=100.0)
+                .text("Max Speed"),
+        );
+
+        ui.label("Acceleration");
+        ui.add(
+            egui::Slider::new(&mut self.acceleration, 0.0..=100.0)
+                .text("Acceleration")
+        );
+
+        ui.label("Turn");
+        ui.add(
+            egui::Slider::new(&mut self.turn, 0.0..=0.1)
+                .text("Turn")
+        );
+
+        ui.label("Drift");
+        ui.add(
+            egui::Slider::new(&mut self.drift, 0.0..=10.0)
+                .text("Drift")
+        );
+
+        false
+    }
+
+    fn ui_readonly(&self, ui: &mut Ui, options: &dyn Any, id: Id, env: InspectorUi<'_, '_>) {
+        todo!()
+    }
+}
+
+pub fn bike_controller_system(
     mut query: Query<(
         &BicycleControl,
         &BicycleParams,
@@ -155,7 +299,7 @@ pub fn car_controller_system(
         let current_rotation = transform.rotation * Vec3::Y;
         ext_force.apply_force(Vec2::new(acceleration, 0.0).rotate(current_rotation.xy()));
 
-        let slow_turn_factor = (forward_velocity / 8.0).clamp(-1.0, 1.0);
+        let slow_turn_factor = (forward_velocity / DEFAULT_MAX_SPEED).clamp(-1.0, 1.0);
         let turn_clamped = control.turn.clamp(-1.0, 1.0);
         let turn = turn_clamped * params.turn * slow_turn_factor;
         transform.rotate_z(turn);
@@ -175,7 +319,7 @@ pub fn car_controller_system(
 /// Basically kills the orthogonal velocity of the bike, as explained here: https://youtu.be/DVHcOS1E5OQ?si=UgpKyHxYqsRehCeZ&t=559
 pub fn drift_factor_system(mut query: Query<(&mut LinearVelocity, &Transform, &BicycleParams)>) {
     for (mut lin_vel, transform, params) in query.iter_mut() {
-        let drift = params.drift;
+        let drift = 1.0 - (0.08 * (1.0 / params.drift));
 
         let bike_forward = (transform.rotation * Vec3::Y).xy();
         let bike_right = (transform.rotation * Vec3::X).xy();

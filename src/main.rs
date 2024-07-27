@@ -9,14 +9,19 @@ mod map;
 mod waypoint;
 mod slow;
 mod camera;
+mod character_editor;
+mod bike_config;
 
-use crate::bike::spawn_player;
+use crate::bike::{BicycleParams, spawn_player};
 use crate::map::spawn_map_system;
 use avian2d::prelude::{Gravity, PhysicsDebugPlugin, PhysicsSet};
 use avian2d::PhysicsPlugins;
 use bevy::asset::AssetMetaCheck;
 use bevy::prelude::*;
 use bevy::render::camera::ScalingMode;
+use bevy_egui::EguiPlugin;
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
+use crate::bike_config::{PlayerConfig, PlayerConfigChangedEvent};
 
 fn main() {
     App::new()
@@ -30,8 +35,13 @@ fn main() {
             }),
             PhysicsPlugins::default().with_length_unit(1.0),
            //PhysicsDebugPlugin::default(),
+            EguiPlugin,
+            WorldInspectorPlugin::new()
         ))
         .insert_resource(Gravity(Vec2::new(0.0, 0.0)))
+
+        .register_type::<BicycleParams>()
+
         .add_systems(
             Startup,
             (
@@ -45,8 +55,10 @@ fn main() {
             (
                 bike::control_player,
                 bike::drift_factor_system,
-                bike::car_controller_system,
+                bike::bike_controller_system,
+                bike::apply_config_to_player.run_if(resource_changed::<PlayerConfig>),
                 waypoint::follow_waypoint,
+                character_editor::character_editor,
             ),
         )
         .add_systems(
@@ -55,6 +67,10 @@ fn main() {
                 .after(PhysicsSet::Sync)
                 .before(TransformSystem::TransformPropagate),
         )
+
+        .insert_resource(PlayerConfig::default())
+        .add_event::<PlayerConfigChangedEvent>()
+
         .run();
 }
 

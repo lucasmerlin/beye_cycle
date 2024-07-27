@@ -29,7 +29,7 @@ pub fn spawn_map_system(
     //     ..Default::default()
     // });
 
-    let map = include_str!("../assets/level1.svg");
+    let map = include_str!("../assets/level2.svg");
     let svg = svg::read(map).unwrap();
 
     //let mut view_box = None;
@@ -51,9 +51,9 @@ pub fn spawn_map_system(
                     let data = data_url::DataUrl::process(href).unwrap();
                     let (vec, meta) = data.decode_to_vec().unwrap();
 
-                    assets.insert_asset("map".into(), &Path::new("map"), vec);
+                    assets.insert_asset("embedded_map.png".into(), &Path::new("embedded_map.png"), vec);
 
-                    let map = asset_server.load("map.png");
+                    let map = asset_server.load("embedded://embedded_map.png");
 
                     let width = attrs.get("width").unwrap().parse().unwrap();
                     let height = attrs.get("height").unwrap().parse::<f32>().unwrap();
@@ -78,15 +78,19 @@ pub fn spawn_map_system(
                         ..Default::default()
                     });
 
+                    let camera_scale = 0.013;
                     let mut camera = Camera2dBundle {
                         transform: center,
                         ..Default::default()
                     };
-                    let camera_scale = 1.0 / 2.0;
-                    camera.projection.scaling_mode = ScalingMode::AutoMin {
-                        min_width: width * camera_scale,
-                        min_height: height * camera_scale,
-                    };
+
+                    camera.projection.scaling_mode = ScalingMode::FixedHorizontal(20.0);
+
+                    // camera.projection.scaling_mode = ScalingMode::AutoMin {
+                    //     min_width: width * camera_scale,
+                    //     min_height: height * camera_scale,
+                    // };
+                    // camera.projection.scaling_mode;
                     commands.spawn((camera,));
                 }
             }
