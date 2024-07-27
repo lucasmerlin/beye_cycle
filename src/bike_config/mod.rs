@@ -1,6 +1,7 @@
 mod addon;
 mod frame;
 
+use bevy::ecs::system::EntityCommands;
 use crate::bike_config::addon::Addon;
 use crate::bike_config::frame::BikeFrame;
 use bevy::math::Vec2;
@@ -16,8 +17,14 @@ pub struct PlayerConfig(pub CharacterConfig);
 #[derive(Debug, Event)]
 pub struct PlayerConfigChangedEvent;
 
-#[derive(Debug, Component, Default)]
-pub struct BicycleMod;
+#[derive(Debug, Component)]
+pub enum BicycleMod {
+    Skin,
+    Hat,
+    RearWheel,
+    Frame,
+    Addon,
+}
 
 pub trait BicycleModTrait {
     fn name(&self) -> &'static str;
@@ -42,6 +49,10 @@ pub trait BicycleModTrait {
     fn asset_res(&self) -> Vec2;
     fn asset_offset(&self) -> Vec2;
     fn z_order(&self) -> f32;
+
+    fn spawn(&self, commands: &mut EntityCommands) {
+
+    }
 }
 
 pub trait Selectable: Sequence {

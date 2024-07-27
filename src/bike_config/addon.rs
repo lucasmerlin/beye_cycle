@@ -1,7 +1,9 @@
+use bevy::ecs::system::EntityCommands;
 use crate::bike_config::BicycleModTrait;
 use bevy::math::Vec2;
 use enum_iterator::Sequence;
 use rand_derive2::RandGen;
+use crate::mods::giraffe::Giraffe;
 
 #[derive(Debug, Clone, Default, Sequence, RandGen, PartialEq)]
 pub enum Addon {
@@ -42,5 +44,17 @@ impl BicycleModTrait for Addon {
 
     fn z_order(&self) -> f32 {
         30.0
+    }
+
+    fn spawn(&self, commands: &mut EntityCommands) {
+        match self {
+            Addon::None => {}
+            Addon::Giraffe => {
+                commands.insert(Giraffe);
+            }
+            Addon::Hook => {}
+            Addon::Lasso => {}
+            Addon::Rocket => {}
+        }
     }
 }

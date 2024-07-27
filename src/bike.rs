@@ -1,17 +1,19 @@
-use std::any::Any;
-use crate::bike_config::{BicycleModTrait, BikeConfig, CharacterConfig, PlayerConfig, Selectable};
+use crate::bike_config::{
+    BicycleMod, BicycleModTrait, BikeConfig, CharacterConfig, PlayerConfig, Selectable,
+};
 use crate::slow::Slow;
 use crate::waypoint::{Waypoint, WaypointAi};
 use avian2d::math::Vector;
 use avian2d::prelude::*;
 use bevy::ecs::system::EntityCommands;
 use bevy::prelude::*;
-use rand::random;
-use std::f32::consts::PI;
 use bevy_egui::egui;
 use bevy_egui::egui::{Id, Ui};
 use bevy_inspector_egui::inspector_egui_impls::InspectorPrimitive;
 use bevy_inspector_egui::reflect_inspector::InspectorUi;
+use rand::random;
+use std::any::Any;
+use std::f32::consts::PI;
 
 #[derive(Component, Debug)]
 pub struct Bicycle;
@@ -114,19 +116,20 @@ pub fn apply_config(
 
     entity_commands.clear_children();
 
-    spawn_selectable(&mut entity_commands, &config.bike.frame, &assets);
+    spawn_selectable(&mut entity_commands, &config.bike.frame, &assets, BicycleMod::Frame);
 
-    spawn_selectable(&mut entity_commands, &config.bike.rear_wheel, &assets);
+    spawn_selectable(&mut entity_commands, &config.bike.rear_wheel, &assets, BicycleMod::RearWheel);
 
-    spawn_selectable(&mut entity_commands, &config.bike.addon, &assets);
+    spawn_selectable(&mut entity_commands, &config.bike.addon, &assets, BicycleMod::Addon);
 
-    spawn_selectable(&mut entity_commands, &config.skin, &assets);
+    spawn_selectable(&mut entity_commands, &config.skin, &assets, BicycleMod::Skin);
 }
 
 fn spawn_selectable(
     commands: &mut EntityCommands,
     selectable: &impl BicycleModTrait,
     assets: &Res<AssetServer>,
+    mod_type: BicycleMod,
 ) {
     let texture_res = selectable.asset_res();
     let offset = selectable.asset_offset();
@@ -139,8 +142,8 @@ fn spawn_selectable(
 
     commands.with_children(|commands| {
         if let Some(asset) = selectable.asset() {
-            commands.spawn(
-                (SpriteBundle {
+            let mut entity = commands.spawn((
+                SpriteBundle {
                     texture: assets.load(asset),
                     transform: Transform::from_translation(Vec3::new(offset.x, offset.y, z_order))
                         * Transform::from_rotation(rotation),
@@ -149,23 +152,29 @@ fn spawn_selectable(
                         ..Default::default()
                     },
                     ..Default::default()
-                }),
-            );
-        }
+                },
+                mod_type,
+            ));
 
-        if let Some(bg) = selectable.bg_asset() {
-            commands.spawn(
-                (SpriteBundle {
-                    texture: assets.load(bg),
-                    transform: Transform::from_translation(Vec3::new(offset.x, offset.y, 1.0))
-                        * Transform::from_rotation(rotation),
-                    sprite: Sprite {
-                        custom_size: Some(game_size),
-                        ..Default::default()
-                    },
-                    ..Default::default()
-                }),
-            );
+            selectable.spawn(&mut entity);
+
+            if let Some(bg) = selectable.bg_asset() {
+                entity.with_children(|commands| {
+                    commands.spawn(
+                        (SpriteBundle {
+                            texture: assets.load(bg),
+                            transform: Transform::from_translation(Vec3::new(
+                                0.0, 0.0, 1.0 - z_order,
+                            )),
+                            sprite: Sprite {
+                                custom_size: Some(game_size),
+                                ..Default::default()
+                            },
+                            ..Default::default()
+                        }),
+                    );
+                });
+            }
         }
     });
 }
@@ -213,30 +222,17 @@ impl std::ops::Mul<BicycleParams> for BicycleParams {
 
 impl InspectorPrimitive for BicycleParams {
     fn ui(&mut self, ui: &mut Ui, options: &dyn Any, id: Id, env: InspectorUi<'_, '_>) -> bool {
-
         ui.label("Max Speed");
-        ui.add(
-            egui::Slider::new(&mut self.max_speed, 0.0..=100.0)
-                .text("Max Speed"),
-        );
+        ui.add(egui::Slider::new(&mut self.max_speed, 0.0..=100.0).text("Max Speed"));
 
         ui.label("Acceleration");
-        ui.add(
-            egui::Slider::new(&mut self.acceleration, 0.0..=100.0)
-                .text("Acceleration")
-        );
+        ui.add(egui::Slider::new(&mut self.acceleration, 0.0..=100.0).text("Acceleration"));
 
         ui.label("Turn");
-        ui.add(
-            egui::Slider::new(&mut self.turn, 0.0..=0.1)
-                .text("Turn")
-        );
+        ui.add(egui::Slider::new(&mut self.turn, 0.0..=0.1).text("Turn"));
 
         ui.label("Drift");
-        ui.add(
-            egui::Slider::new(&mut self.drift, 0.0..=10.0)
-                .text("Drift")
-        );
+        ui.add(egui::Slider::new(&mut self.drift, 0.0..=10.0).text("Drift"));
 
         false
     }

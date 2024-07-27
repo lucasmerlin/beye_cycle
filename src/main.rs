@@ -11,6 +11,7 @@ mod slow;
 mod camera;
 mod character_editor;
 mod bike_config;
+mod mods;
 
 use crate::bike::{BicycleParams, spawn_player};
 use crate::map::spawn_map_system;
@@ -22,6 +23,7 @@ use bevy::render::camera::ScalingMode;
 use bevy_egui::EguiPlugin;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use crate::bike_config::{PlayerConfig, PlayerConfigChangedEvent};
+use crate::mods::giraffe::GiraffePlugin;
 
 fn main() {
     App::new()
@@ -36,7 +38,9 @@ fn main() {
             PhysicsPlugins::default().with_length_unit(1.0),
            //PhysicsDebugPlugin::default(),
             EguiPlugin,
-            WorldInspectorPlugin::new()
+            WorldInspectorPlugin::new(),
+
+            GiraffePlugin,
         ))
         .insert_resource(Gravity(Vec2::new(0.0, 0.0)))
 
