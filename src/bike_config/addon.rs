@@ -1,5 +1,5 @@
 use bevy::ecs::system::EntityCommands;
-use crate::bike_config::BicycleModTrait;
+use crate::bike_config::{BicycleModTrait, FRAME_OFFSET};
 use bevy::math::Vec2;
 use enum_iterator::Sequence;
 use rand_derive2::RandGen;
@@ -39,7 +39,7 @@ impl BicycleModTrait for Addon {
     }
 
     fn asset_offset(&self) -> Vec2 {
-        Vec2::new(-1.5, -2.9) / 3.0
+        Vec2::new(-1.5, -2.9) / 3.0 + FRAME_OFFSET
     }
 
     fn z_order(&self) -> f32 {

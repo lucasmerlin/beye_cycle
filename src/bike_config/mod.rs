@@ -11,6 +11,8 @@ use rand::prelude::IteratorRandom;
 use rand::thread_rng;
 use rand_derive2::RandGen;
 
+pub const FRAME_OFFSET: Vec2 = Vec2::new(-0.9, 0.0);
+
 #[derive(Debug, Resource, Default, RandGen)]
 pub struct PlayerConfig(pub CharacterConfig);
 
@@ -128,7 +130,7 @@ impl BicycleModTrait for Skin {
     }
 
     fn asset_offset(&self) -> Vec2 {
-        Vec2::new(-1.8, -0.9) / 3.0
+        Vec2::new(-1.8, -0.9) / 3.0 + FRAME_OFFSET
     }
 
     fn z_order(&self) -> f32 {
@@ -213,7 +215,7 @@ impl BicycleModTrait for RearWheel {
     }
 
     fn asset_offset(&self) -> Vec2 {
-        Vec2::new(0.7, -1.9) / 3.0
+        Vec2::new(0.7, -1.9) / 3.0 + FRAME_OFFSET
     }
 
     fn z_order(&self) -> f32 {

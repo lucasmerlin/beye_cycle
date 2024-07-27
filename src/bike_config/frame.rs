@@ -1,5 +1,5 @@
 use crate::bike::BicycleParams;
-use crate::bike_config::{BicycleModTrait, Selectable};
+use crate::bike_config::{BicycleModTrait, FRAME_OFFSET, Selectable};
 use bevy::prelude::Vec2;
 use enum_iterator::{all, Sequence};
 use rand::prelude::IteratorRandom;
@@ -34,7 +34,7 @@ impl BicycleModTrait for BikeFrame {
     }
 
     fn asset_offset(&self) -> Vec2 {
-        Vec2::new(0.0, 0.0)
+        FRAME_OFFSET
     }
 
     fn z_order(&self) -> f32 {
