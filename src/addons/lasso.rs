@@ -1,8 +1,8 @@
-use crate::bike::Player;
+use crate::bike::{Bicycle, Player};
 use crate::bike_config::ForBicycle;
 use crate::ranking::{Progress, Rank};
-use bevy::input::keyboard::KeyboardInput;
 use bevy::prelude::*;
+use rand::random;
 
 pub struct LassoPlugin;
 
@@ -15,6 +15,7 @@ impl Plugin for LassoPlugin {
                 fire_lasso_system,
                 move_to_target_system,
                 lasso_hit_system,
+                ai_lasso_control_system,
             ),
         )
         .add_event::<MovedToTargetEvent>()
@@ -22,8 +23,18 @@ impl Plugin for LassoPlugin {
     }
 }
 
-#[derive(Debug, Component, Default)]
-pub struct LassoAddon;
+#[derive(Debug, Component)]
+pub struct LassoAddon {
+    ai_timer: Timer,
+}
+
+impl Default for LassoAddon {
+    fn default() -> Self {
+        Self {
+            ai_timer: Timer::from_seconds(random::<f32>() * 5.0, TimerMode::Once),
+        }
+    }
+}
 
 pub const LASOO_SPEED: f32 = 0.1;
 
@@ -55,15 +66,37 @@ pub struct MovedToTargetEvent {
 
 pub fn player_lasso_control_system(
     mut commands: Commands,
-    mut query: Query<(&LassoAddon, &GlobalTransform, &ForBicycle)>,
+    mut query: Query<(Entity, &LassoAddon, &GlobalTransform, &ForBicycle, &Parent)>,
     mut is_player_query: Query<&Player>,
     input: Res<ButtonInput<KeyCode>>,
     mut events: EventWriter<FireLassoEvent>,
 ) {
-    for (lasso, transform, for_bicycle) in query.iter_mut() {
+    for (entity, lasso, transform, for_bicycle, parent) in query.iter_mut() {
         if let Ok(_) = is_player_query.get(for_bicycle.0) {
             if input.just_pressed(KeyCode::Space) {
                 events.send(FireLassoEvent { by: for_bicycle.0 });
+
+                commands.entity(parent.get()).remove_children(&[entity]);
+                commands.entity(entity).despawn_recursive();
+            }
+        }
+    }
+}
+
+pub fn ai_lasso_control_system(
+    mut commands: Commands,
+    mut query: Query<(Entity, &mut LassoAddon, &GlobalTransform, &ForBicycle, &Parent)>,
+    mut is_not_player_query: Query<&Bicycle, Without<Player>>,
+    mut events: EventWriter<FireLassoEvent>,
+    time: Res<Time>,
+) {
+    for (entity, mut lasso, transform, for_bicycle, parent) in query.iter_mut() {
+        if let Ok(_) = is_not_player_query.get(for_bicycle.0) {
+            if lasso.ai_timer.tick(time.delta()).just_finished() {
+                events.send(FireLassoEvent { by: for_bicycle.0 });
+
+                commands.entity(parent.get()).remove_children(&[entity]);
+                commands.entity(entity).despawn_recursive();
             }
         }
     }
@@ -127,7 +160,10 @@ pub fn move_to_target_system(
         transform.translation += direction * target.speed;
 
         if distance < 1.0 {
-            events.send(MovedToTargetEvent { entity, target: target.target });
+            events.send(MovedToTargetEvent {
+                entity,
+                target: target.target,
+            });
         }
     }
 }

@@ -1,8 +1,9 @@
 use crate::addons::lasso::{MoveToTarget, MovedToTargetEvent};
-use crate::bike::Player;
+use crate::bike::{Bicycle, Player};
 use crate::bike_config::ForBicycle;
 use crate::ranking::{Progress, Rank};
 use bevy::prelude::*;
+use rand::random;
 
 pub struct HookPlugin;
 
@@ -14,14 +15,25 @@ impl Plugin for HookPlugin {
                 player_hook_control_system,
                 fire_hook_system,
                 hook_hit_system,
+                ai_hook_control_system,
             ),
         )
         .add_event::<FireHookEvent>();
     }
 }
 
-#[derive(Debug, Component, Default)]
-pub struct HookAddon;
+#[derive(Debug, Component)]
+pub struct HookAddon {
+    ai_timer: Timer,
+}
+
+impl Default for HookAddon {
+    fn default() -> Self {
+        Self {
+            ai_timer: Timer::from_seconds(random::<f32>() * 5.0, TimerMode::Once),
+        }
+    }
+}
 
 pub const HOOK_SPEED: f32 = 0.1;
 
@@ -41,15 +53,43 @@ pub struct HookCaughtAndMovingBack;
 
 pub fn player_hook_control_system(
     mut commands: Commands,
-    mut query: Query<(&HookAddon, &GlobalTransform, &ForBicycle)>,
+    mut query: Query<(Entity, &HookAddon, &GlobalTransform, &ForBicycle, &Parent)>,
     mut is_player_query: Query<&Player>,
     input: Res<ButtonInput<KeyCode>>,
     mut events: EventWriter<FireHookEvent>,
 ) {
-    for (_, transform, for_bicycle) in query.iter_mut() {
+    for (entity, _, transform, for_bicycle, parent) in query.iter_mut() {
         if let Ok(_) = is_player_query.get(for_bicycle.0) {
             if input.just_pressed(KeyCode::Space) {
                 events.send(FireHookEvent { by: for_bicycle.0 });
+
+                commands.entity(parent.get()).remove_children(&[entity]);
+                commands.entity(entity).despawn_recursive();
+            }
+        }
+    }
+}
+
+pub fn ai_hook_control_system(
+    mut commands: Commands,
+    mut query: Query<(
+        Entity,
+        &mut HookAddon,
+        &GlobalTransform,
+        &ForBicycle,
+        &Parent,
+    )>,
+    mut is_not_player_query: Query<&Bicycle, Without<Player>>,
+    mut events: EventWriter<FireHookEvent>,
+    time: Res<Time>,
+) {
+    for (entity, mut hook, transform, for_bicycle, parent) in query.iter_mut() {
+        if let Ok(_) = is_not_player_query.get(for_bicycle.0) {
+            if hook.ai_timer.tick(time.delta()).just_finished() {
+                events.send(FireHookEvent { by: for_bicycle.0 });
+
+                commands.entity(parent.get()).remove_children(&[entity]);
+                commands.entity(entity).despawn_recursive();
             }
         }
     }
