@@ -1,3 +1,4 @@
+use crate::item_pickup::ItemPickup;
 use crate::slow::Slow;
 use crate::waypoint::Waypoint;
 use avian2d::math::Vector;
@@ -14,7 +15,6 @@ use svg::node::element::tag;
 use svg::node::element::tag::Type;
 use svg::node::Value;
 use svg::parser::Event;
-use crate::item_pickup::ItemPickup;
 
 pub fn spawn_map_system(
     mut commands: Commands,
@@ -117,9 +117,13 @@ pub fn spawn_map_system(
                 let mut prev = None;
 
                 if attrs.get("id").map(Deref::deref) == Some("track") {
-                    for (x, y) in points.iter().rev() {
+                    for (idx, (x, y)) in points.iter().enumerate().rev() {
                         let mut entity = commands.spawn((
-                            Waypoint { next: prev },
+                            Name::new(format!("Waypoint {}", idx)),
+                            Waypoint {
+                                next: prev,
+                                index: idx,
+                            },
                             TransformBundle {
                                 local: Transform::from_translation(Vec3::new(*x, *y, 0.0)),
                                 ..Default::default()
@@ -144,7 +148,10 @@ pub fn spawn_map_system(
                 }
 
                 if let Some(first) = first {
-                    commands.entity(first).insert(Waypoint { next: prev });
+                    commands.entity(first).insert(Waypoint {
+                        next: prev,
+                        index: points.len(),
+                    });
                 }
 
                 let class = attrs.get("class").map(Deref::deref);

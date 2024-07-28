@@ -9,15 +9,16 @@ mod bike_config;
 mod camera;
 mod character_editor;
 mod map;
-mod mods;
+mod addons;
 mod slow;
 mod waypoint;
 mod item_pickup;
+mod ranking;
 
 use crate::bike::{spawn_player, BicycleParams};
 use crate::bike_config::{PlayerConfig, PlayerConfigChangedEvent};
 use crate::map::spawn_map_system;
-use crate::mods::giraffe::GiraffePlugin;
+use crate::addons::giraffe::GiraffePlugin;
 use avian2d::prelude::{Gravity, PhysicsDebugPlugin, PhysicsSet};
 use avian2d::PhysicsPlugins;
 use bevy::asset::AssetMetaCheck;
@@ -26,6 +27,8 @@ use bevy::render::camera::ScalingMode;
 use bevy_egui::EguiPlugin;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use crate::item_pickup::ItemPickupPlugin;
+use crate::ranking::{Progress, Rank, RankingPlugin};
+use crate::waypoint::Waypoint;
 
 fn main() {
     App::new()
@@ -50,9 +53,13 @@ fn main() {
             WorldInspectorPlugin::new(),
             GiraffePlugin,
             ItemPickupPlugin,
+            RankingPlugin,
         ))
         .insert_resource(Gravity(Vec2::new(0.0, 0.0)))
         .register_type::<BicycleParams>()
+        .register_type::<Rank>()
+        .register_type::<Progress>()
+        .register_type::<Waypoint>()
         .add_systems(
             Startup,
             (

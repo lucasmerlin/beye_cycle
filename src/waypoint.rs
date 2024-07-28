@@ -1,11 +1,12 @@
 use crate::bike::{BicycleControl, Player};
-use crate::mods::giraffe::PooCollision;
+use crate::addons::giraffe::PooCollision;
 use avian2d::prelude::LinearVelocity;
 use bevy::prelude::*;
 
-#[derive(Component, Debug)]
+#[derive(Component, Debug, Reflect)]
 pub struct Waypoint {
     pub next: Option<Entity>,
+    pub index: usize,
 }
 
 #[derive(Component, Debug)]

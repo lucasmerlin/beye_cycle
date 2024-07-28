@@ -1,4 +1,9 @@
-use crate::bike_config::{BicycleMod, BicycleModTrait, BikeConfig, CharacterConfig, ForBicycle, FRAME_OFFSET, PlayerConfig, Selectable};
+use crate::addons::giraffe::PooCollision;
+use crate::bike_config::{
+    BicycleMod, BicycleModTrait, BikeConfig, CharacterConfig, ForBicycle, PlayerConfig, Selectable,
+    FRAME_OFFSET,
+};
+use crate::ranking::{Progress, Rank};
 use crate::slow::Slow;
 use crate::waypoint::{Waypoint, WaypointAi};
 use avian2d::math::Vector;
@@ -6,13 +11,12 @@ use avian2d::prelude::*;
 use bevy::ecs::system::EntityCommands;
 use bevy::prelude::*;
 use bevy_egui::egui;
-use bevy_egui::egui::{Id, lerp, Ui};
+use bevy_egui::egui::{lerp, Id, Ui};
 use bevy_inspector_egui::inspector_egui_impls::InspectorPrimitive;
 use bevy_inspector_egui::reflect_inspector::InspectorUi;
 use rand::random;
 use std::any::Any;
 use std::f32::consts::PI;
-use crate::mods::giraffe::PooCollision;
 
 #[derive(Component, Debug)]
 pub struct Bicycle;
@@ -45,6 +49,13 @@ pub fn spawn_player(
                     turn: 0.0,
                     acceleration: 1.0,
                 },
+                Progress {
+                    next_checkpoint: first_waypoint_entity,
+                    round: 0,
+                    checkpoint_idx: 0,
+                    distance_to_next_checkpoint: 0.0,
+                },
+                Rank(0),
                 RigidBody::Dynamic,
                 VisibilityBundle::default(),
                 Collider::rectangle(GAME_BICYCLE_LENGTH / 10.0, GAME_BICYCLE_LENGTH),
@@ -73,25 +84,39 @@ pub fn spawn_player(
             let mut container_id = None;
 
             entity.with_children(|commands| {
-                container_id = Some(commands.spawn((
-                    TransformBundle {
-                        local: Transform::from_translation(Vec3::new(-0.9, 0.0, 0.0)),
-                      ..Default::default()
-                    },
-                    VisibilityBundle::default(),
-                    ModContainer,
-                )).id());
+                container_id = Some(
+                    commands
+                        .spawn((
+                            TransformBundle {
+                                local: Transform::from_translation(Vec3::new(-0.9, 0.0, 0.0)),
+                                ..Default::default()
+                            },
+                            VisibilityBundle::default(),
+                            ModContainer,
+                        ))
+                        .id(),
+                );
             });
 
             (entity.id(), container_id.unwrap())
         };
 
-
-
         if player {
-            apply_config(&mut commands, player_id, container_id, &player_config.0, &asset_server);
+            apply_config(
+                &mut commands,
+                player_id,
+                container_id,
+                &player_config.0,
+                &asset_server,
+            );
         } else {
-            apply_config(&mut commands, player_id, container_id, &random(), &asset_server);
+            apply_config(
+                &mut commands,
+                player_id,
+                container_id,
+                &random(),
+                &asset_server,
+            );
         }
     };
 
@@ -100,7 +125,7 @@ pub fn spawn_player(
     let direction_right = direction.normalize().rotate(Vec2::from_angle(PI / 2.0));
 
     // Places enemies in a F1 like  grid
-    for i in 0..4 {
+    for i in 0..0 {
         let offset = direction.normalize() * (i as f32 * 2.0) + direction_right * (i as f32 % 2.0);
         spawn(false, offset);
     }
@@ -119,11 +144,9 @@ pub fn apply_config_to_player(
 
     let player = query.iter_mut().next();
     if let Some((player, params, children)) = player {
-
         let container = *children.first().unwrap();
 
         apply_config(&mut commands, player, container, &config.0, &assets);
-
     }
 }
 
@@ -144,13 +167,37 @@ pub fn apply_config(
 
     container_commands.clear_children();
 
-    spawn_selectable(entity, &mut container_commands, &config.bike.frame, &assets, BicycleMod::Frame);
+    spawn_selectable(
+        entity,
+        &mut container_commands,
+        &config.bike.frame,
+        &assets,
+        BicycleMod::Frame,
+    );
 
-    spawn_selectable(entity, &mut container_commands, &config.bike.rear_wheel, &assets, BicycleMod::RearWheel);
+    spawn_selectable(
+        entity,
+        &mut container_commands,
+        &config.bike.rear_wheel,
+        &assets,
+        BicycleMod::RearWheel,
+    );
 
-    spawn_selectable(entity, &mut container_commands, &config.bike.addon, &assets, BicycleMod::Addon);
+    spawn_selectable(
+        entity,
+        &mut container_commands,
+        &config.bike.addon,
+        &assets,
+        BicycleMod::Addon,
+    );
 
-    spawn_selectable(entity, &mut container_commands, &config.skin, &assets, BicycleMod::Skin);
+    spawn_selectable(
+        entity,
+        &mut container_commands,
+        &config.skin,
+        &assets,
+        BicycleMod::Skin,
+    );
 }
 
 pub fn spawn_selectable(
@@ -194,7 +241,9 @@ pub fn spawn_selectable(
                         (SpriteBundle {
                             texture: assets.load(bg),
                             transform: Transform::from_translation(Vec3::new(
-                                0.0, 0.0, 1.0 - z_order,
+                                0.0,
+                                0.0,
+                                1.0 - z_order,
                             )),
                             sprite: Sprite {
                                 custom_size: Some(game_size),
@@ -381,7 +430,6 @@ pub fn control_player(
     }
 }
 
-
 // if the bike is going to the left, mirror it vertically
 pub fn mirror_bike_system(
     mut query: Query<(&mut Transform, &Children), With<Bicycle>>,
@@ -395,12 +443,14 @@ pub fn mirror_bike_system(
                 if rotation > PI / 2.0 {
                     if child_transform.scale.x > -1.0 {
                         child_transform.scale.x -= 0.1;
-                        child_transform.translation.x = lerp(-0.45..=0.45, (-1.0 * child_transform.scale.x) / 2.0 + 0.5);
+                        child_transform.translation.x =
+                            lerp(-0.45..=0.45, (-1.0 * child_transform.scale.x) / 2.0 + 0.5);
                     }
                 } else {
                     if child_transform.scale.x < 1.0 {
                         child_transform.scale.x += 0.1;
-                        child_transform.translation.x = lerp(0.45..=-0.45, child_transform.scale.x / 2.0 + 0.5);
+                        child_transform.translation.x =
+                            lerp(0.45..=-0.45, child_transform.scale.x / 2.0 + 0.5);
                     }
                 }
             }

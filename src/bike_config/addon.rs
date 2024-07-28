@@ -4,7 +4,7 @@ use bevy::math::Vec2;
 use bevy::prelude::Component;
 use enum_iterator::Sequence;
 use rand_derive2::RandGen;
-use crate::mods::giraffe::Giraffe;
+use crate::addons::giraffe::Giraffe;
 
 #[derive(Debug, Component)]
 pub struct AddonComponent;
