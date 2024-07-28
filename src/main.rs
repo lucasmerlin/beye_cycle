@@ -12,6 +12,7 @@ mod map;
 mod mods;
 mod slow;
 mod waypoint;
+mod item_pickup;
 
 use crate::bike::{spawn_player, BicycleParams};
 use crate::bike_config::{PlayerConfig, PlayerConfigChangedEvent};
@@ -24,6 +25,7 @@ use bevy::prelude::*;
 use bevy::render::camera::ScalingMode;
 use bevy_egui::EguiPlugin;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
+use crate::item_pickup::ItemPickupPlugin;
 
 fn main() {
     App::new()
@@ -47,6 +49,7 @@ fn main() {
             EguiPlugin,
             WorldInspectorPlugin::new(),
             GiraffePlugin,
+            ItemPickupPlugin,
         ))
         .insert_resource(Gravity(Vec2::new(0.0, 0.0)))
         .register_type::<BicycleParams>()

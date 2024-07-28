@@ -1,5 +1,5 @@
-mod addon;
-mod frame;
+pub mod addon;
+pub mod frame;
 
 use bevy::ecs::system::EntityCommands;
 use crate::bike_config::addon::Addon;

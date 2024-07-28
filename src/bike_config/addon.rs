@@ -1,9 +1,13 @@
 use bevy::ecs::system::EntityCommands;
 use crate::bike_config::{BicycleModTrait, FRAME_OFFSET};
 use bevy::math::Vec2;
+use bevy::prelude::Component;
 use enum_iterator::Sequence;
 use rand_derive2::RandGen;
 use crate::mods::giraffe::Giraffe;
+
+#[derive(Debug, Component)]
+pub struct AddonComponent;
 
 #[derive(Debug, Clone, Default, Sequence, RandGen, PartialEq)]
 pub enum Addon {
@@ -47,6 +51,7 @@ impl BicycleModTrait for Addon {
     }
 
     fn spawn(&self, commands: &mut EntityCommands) {
+        commands.insert(AddonComponent);
         match self {
             Addon::None => {}
             Addon::Giraffe => {

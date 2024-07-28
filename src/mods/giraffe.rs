@@ -111,7 +111,6 @@ pub fn spawn_poo(
             },
             ..Default::default()
         },
-        RigidBody::Static,
         Collider::circle(0.2),
         Poo,
     ));

@@ -1,3 +1,4 @@
+use crate::slow::Slow;
 use crate::waypoint::Waypoint;
 use avian2d::math::Vector;
 use avian2d::prelude::{Collider, Position, RigidBody, Rotation, VhacdParameters};
@@ -13,7 +14,7 @@ use svg::node::element::tag;
 use svg::node::element::tag::Type;
 use svg::node::Value;
 use svg::parser::Event;
-use crate::slow::Slow;
+use crate::item_pickup::ItemPickup;
 
 pub fn spawn_map_system(
     mut commands: Commands,
@@ -51,7 +52,11 @@ pub fn spawn_map_system(
                     let data = data_url::DataUrl::process(href).unwrap();
                     let (vec, meta) = data.decode_to_vec().unwrap();
 
-                    assets.insert_asset("embedded_map.jpeg".into(), &Path::new("embedded_map.jpeg"), vec);
+                    assets.insert_asset(
+                        "embedded_map.jpeg".into(),
+                        &Path::new("embedded_map.jpeg"),
+                        vec,
+                    );
 
                     let map = asset_server.load("embedded://embedded_map.jpeg");
 
@@ -200,7 +205,29 @@ pub fn spawn_map_system(
                 if classes.contains(&"collider") {
                     commands.spawn((RigidBody::Static, collider));
                 } else if classes.contains(&"slow") {
-                    commands.spawn( (collider, Slow));
+                    commands.spawn((collider, Slow));
+                }
+            }
+            Event::Tag(tag::Circle, _, attrs) => {
+                let cx = attrs.get("cx").unwrap().parse().unwrap();
+                let cy = -attrs.get("cy").unwrap().parse::<f32>().unwrap();
+
+                let collider = Collider::circle(0.5);
+
+                if attrs.get("class").map(Deref::deref) == Some("pickup") {
+                    commands.spawn((
+                        SpriteBundle {
+                            texture: asset_server.load("ducky.png"),
+                            transform: Transform::from_translation(Vec3::new(cx, cy, 0.0)),
+                            sprite: Sprite {
+                                custom_size: Some(Vec2::new(1.0, 1.0)),
+                                ..Default::default()
+                            },
+                            ..Default::default()
+                        },
+                        collider,
+                        ItemPickup::default(),
+                    ));
                 }
             }
             _ => {}

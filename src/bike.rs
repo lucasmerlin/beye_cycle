@@ -20,6 +20,9 @@ pub struct Bicycle;
 #[derive(Component, Debug)]
 pub struct Player;
 
+#[derive(Component, Debug)]
+pub struct ModContainer;
+
 pub fn spawn_player(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
@@ -76,6 +79,7 @@ pub fn spawn_player(
                       ..Default::default()
                     },
                     VisibilityBundle::default(),
+                    ModContainer,
                 )).id());
             });
 
@@ -149,7 +153,7 @@ pub fn apply_config(
     spawn_selectable(entity, &mut container_commands, &config.skin, &assets, BicycleMod::Skin);
 }
 
-fn spawn_selectable(
+pub fn spawn_selectable(
     bicycle: Entity,
     commands: &mut EntityCommands,
     selectable: &impl BicycleModTrait,
