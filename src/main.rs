@@ -34,7 +34,14 @@ fn main() {
                 // See https://github.com/bevyengine/bevy_github_ci_template/issues/48.
                 meta_check: AssetMetaCheck::Never,
                 ..default()
-            }),
+            })
+                .set(WindowPlugin {
+                    primary_window: Some(Window {
+                        fit_canvas_to_parent: true,
+                        ..Default::default()
+                    }),
+                    ..default()
+                }),
             PhysicsPlugins::default().with_length_unit(1.0),
             //PhysicsDebugPlugin::default(),
             EguiPlugin,
