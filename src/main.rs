@@ -28,6 +28,7 @@ use bevy_egui::EguiPlugin;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use crate::addons::hook::HookPlugin;
 use crate::addons::lasso::{FireLassoEvent, LassoPlugin};
+use crate::addons::rocket;
 use crate::item_pickup::ItemPickupPlugin;
 use crate::ranking::{Progress, Rank, RankingPlugin};
 use crate::waypoint::Waypoint;
@@ -50,7 +51,7 @@ fn main() {
                     ..default()
                 }),
             PhysicsPlugins::default().with_length_unit(1.0),
-            PhysicsDebugPlugin::default(),
+            //PhysicsDebugPlugin::default(),
             EguiPlugin,
             WorldInspectorPlugin::new(),
             GiraffePlugin,
@@ -82,6 +83,7 @@ fn main() {
                 bike::mirror_bike_system,
                 waypoint::follow_waypoint,
                 character_editor::character_editor,
+                rocket::despawn_rocket_system,
             ),
         )
         .add_systems(

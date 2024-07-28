@@ -17,6 +17,7 @@ use bevy_inspector_egui::reflect_inspector::InspectorUi;
 use rand::random;
 use std::any::Any;
 use std::f32::consts::PI;
+use crate::addons::rocket::RocketAddon;
 
 #[derive(Component, Debug)]
 pub struct Bicycle;
@@ -60,7 +61,7 @@ pub fn spawn_player(
                 Rank(0),
                 RigidBody::Dynamic,
                 VisibilityBundle::default(),
-                Collider::rectangle(GAME_BICYCLE_LENGTH / 10.0, GAME_BICYCLE_LENGTH),
+                Collider::capsule(GAME_BICYCLE_LENGTH / 10.0, GAME_BICYCLE_LENGTH),
                 // This was just the initial size I chose when first testing bike params
                 Mass(0.2 * 2.0),
                 ExternalForce::default(),
@@ -335,18 +336,27 @@ impl InspectorPrimitive for BicycleParams {
 
 pub fn bike_controller_system(
     mut query: Query<(
+        Entity,
         &BicycleControl,
         &BicycleParams,
         &LinearVelocity,
         &mut Transform,
         &mut ExternalForce,
         &mut LinearDamping,
+        &Children,
     )>,
+    children_query: Query<&Children>,
+    has_rocket_query: Query<(&RocketAddon)>,
     spatial_query: SpatialQuery,
     mut slow_query: Query<(&Slow)>,
 ) {
-    for (control, params, velocity, mut transform, mut ext_force, mut damping) in query.iter_mut() {
+    for (entity, control, params, velocity, mut transform, mut ext_force, mut damping, container) in query.iter_mut() {
         ext_force.clear();
+
+        let container = container.iter().next().unwrap();
+        let container_children = children_query.get(*container).unwrap();
+
+        let has_rocket = container_children.iter().any(|entity| has_rocket_query.get(*entity).is_ok());
 
         let intersections = spatial_query.point_intersections(
             Vector::new(transform.translation.x, transform.translation.y),
@@ -356,16 +366,21 @@ pub fn bike_controller_system(
             .iter()
             .any(|entity| slow_query.get(*entity).is_ok());
 
-        let max_speed = if slow {
+        let mut max_speed = if slow {
             params.max_speed * 0.5
         } else {
             params.max_speed
         };
-        let acceleration = if slow {
+        let mut acceleration = if slow {
             params.acceleration * 0.5
         } else {
             params.acceleration
         };
+
+        if has_rocket {
+            max_speed *= 2.0;
+            acceleration *= 2.0;
+        }
 
         let bike_forward = (transform.rotation * Vec3::Y).xy();
 

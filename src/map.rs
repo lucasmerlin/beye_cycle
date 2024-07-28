@@ -58,7 +58,6 @@ pub fn spawn_map_system(
                     //     vec,
                     // );
 
-
                     let map = asset_server.load(href.to_string());
 
                     let width = attrs.get("width").unwrap().parse().unwrap();
@@ -160,68 +159,52 @@ pub fn spawn_map_system(
                     .map(|s| s.split(' ').collect::<Vec<_>>())
                     .unwrap_or_default();
 
-                // let mut buffers = VertexBuffers::new();
-                //
-                // let mut builder = SimpleBuffersBuilder::new(&mut buffers, Positions);
-                //
-                // let mut tessellator = lyon::tessellation::FillTessellator::new();
-                // let fill_options = FillOptions::default();
-                // let mut builder = tessellator.builder(&fill_options, &mut builder);
-                // points
-                //     .iter()
-                //     .map(|(x, y)| lyon::math::Point::new(*x, *y))
-                //     .enumerate()
-                //     .for_each(|(i, p)| {
-                //         if i == 0 {
-                //             builder.begin(p);
-                //         } else {
-                //             builder.line_to(p);
-                //         }
-                //     });
-                //
-                // builder.end(true);
-                // builder.build().unwrap();
-                //
-                // let collider = Collider::compound(
-                //     buffers
-                //         .indices
-                //         .iter()
-                //         .tuples()
-                //         .map(|(i, j, k)| {
-                //             (
-                //                 Position::default(),
-                //                 Rotation::default(),
-                //                 Collider::triangle(
-                //                     Vector::new(
-                //                         buffers.vertices[*i as usize].x,
-                //                         buffers.vertices[*i as usize].y,
-                //                     ),
-                //                     Vector::new(
-                //                         buffers.vertices[*j as usize].x,
-                //                         buffers.vertices[*j as usize].y,
-                //                     ),
-                //                     Vector::new(
-                //                         buffers.vertices[*k as usize].x,
-                //                         buffers.vertices[*k as usize].y,
-                //                     ),
-                //                 ),
-                //             )
-                //         })
-                //         .collect::<Vec<_>>(),
-                // );
+                let mut buffers = VertexBuffers::new();
 
-                let collider = Collider::convex_hull(
-                    points
-                        .iter()
-                        .map(|(x, y)| Vector::new(*x, *y))
-                        .collect::<Vec<_>>(),
-                ).unwrap();
+                let mut builder = SimpleBuffersBuilder::new(&mut buffers, Positions);
 
-                if classes.contains(&"collider") {
-                    commands.spawn((RigidBody::Static, collider));
-                } else if classes.contains(&"slow") {
-                    commands.spawn((collider, Slow));
-                }
+                let mut tessellator = lyon::tessellation::FillTessellator::new();
+                let fill_options = FillOptions::default();
+                let mut builder = tessellator.builder(&fill_options, &mut builder);
+                points
+                    .iter()
+                    .map(|(x, y)| lyon::math::Point::new(*x, *y))
+                    .enumerate()
+                    .for_each(|(i, p)| {
+                        if i == 0 {
+                            builder.begin(p);
+                        } else {
+                            builder.line_to(p);
+                        }
+                    });
+
+                builder.end(true);
+                builder.build().unwrap();
+
+                buffers.indices.iter().tuples().for_each(|(i, j, k)| {
+                    // Triangle order is important!: https://github.com/Jondolf/avian/issues/368
+                    let collider = Collider::triangle(
+                        Vector::new(
+                            buffers.vertices[*i as usize].x,
+                            buffers.vertices[*i as usize].y,
+                        ),
+                        Vector::new(
+                            buffers.vertices[*k as usize].x,
+                            buffers.vertices[*k as usize].y,
+                        ),
+                        Vector::new(
+                            buffers.vertices[*j as usize].x,
+                            buffers.vertices[*j as usize].y,
+                        ),
+                    );
+
+                    if classes.contains(&"collider") {
+                        commands.spawn((RigidBody::Static, collider));
+                    } else if classes.contains(&"slow") {
+                        commands.spawn((collider, Slow));
+                    }
+                });
+
             }
             Event::Tag(tag::Circle, _, attrs) => {
                 let cx = attrs.get("cx").unwrap().parse().unwrap();

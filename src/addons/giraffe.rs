@@ -99,7 +99,7 @@ pub fn spawn_poo(
 ) {
     let bike_dir = bike_transform.up().normalize();
 
-    let offset = -bike_dir * (GAME_BICYCLE_LENGTH / 2.0 + 0.3);
+    let offset = -bike_dir * (GAME_BICYCLE_LENGTH / 2.0 + 0.5);
 
     commands.spawn((
         SpriteBundle {

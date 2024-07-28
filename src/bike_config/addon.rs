@@ -7,6 +7,7 @@ use rand_derive2::RandGen;
 use crate::addons::giraffe::Giraffe;
 use crate::addons::hook::HookAddon;
 use crate::addons::lasso::LassoAddon;
+use crate::addons::rocket::RocketAddon;
 
 #[derive(Debug, Component)]
 pub struct AddonComponent;
@@ -65,7 +66,9 @@ impl BicycleModTrait for Addon {
             Addon::Lasso => {
                 commands.insert(LassoAddon::default());
             }
-            Addon::Rocket => {}
+            Addon::Rocket => {
+                commands.insert(RocketAddon::default());
+            }
         }
     }
 }

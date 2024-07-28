@@ -158,6 +158,7 @@ pub fn move_to_target_system(
         let direction = direction.normalize();
 
         transform.translation += direction * target.speed;
+        transform.rotation = target_transform.compute_transform().rotation;
 
         if distance < 1.0 {
             events.send(MovedToTargetEvent {
