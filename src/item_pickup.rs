@@ -1,9 +1,11 @@
 use crate::bike::{spawn_selectable, Bicycle, ModContainer};
 use crate::bike_config::addon::{Addon, AddonComponent};
-use crate::bike_config::BicycleMod;
+use crate::bike_config::{BicycleMod, BicycleModTrait};
 use avian2d::prelude::Collision;
 use bevy::prelude::*;
-use rand::random;
+use enum_iterator::all;
+use rand::prelude::IteratorRandom;
+use rand::{random, thread_rng};
 
 pub struct ItemPickupPlugin;
 
@@ -22,11 +24,7 @@ pub struct ItemPickup {
 impl Default for ItemPickup {
     fn default() -> Self {
         let mut timer = Timer::from_seconds(1.0, TimerMode::Once);
-        timer.pause();
-        Self {
-            item: Some(random()),
-            timer: timer,
-        }
+        Self { item: None, timer }
     }
 }
 
@@ -59,7 +57,6 @@ pub fn item_collision_system(
                 let item = pickup.item.take();
                 *visibility = Visibility::Hidden;
                 pickup.timer.reset();
-                pickup.timer.unpause();
 
                 let container = bicycle_children.first().unwrap();
 
@@ -86,11 +83,18 @@ pub fn item_collision_system(
 
 pub fn respawn_item_system(
     time: Res<Time>,
-    mut pickup_query: Query<(&mut ItemPickup, &mut Visibility)>,
+    mut pickup_query: Query<(&mut ItemPickup, &mut Visibility, &mut Handle<Image>)>,
+    assets: Res<AssetServer>,
 ) {
-    for ((mut pickup, mut visibility)) in pickup_query.iter_mut() {
+    for ((mut pickup, mut visibility, mut image)) in pickup_query.iter_mut() {
         if pickup.timer.tick(time.delta()).just_finished() {
-            pickup.item = Some(random());
+            let item: Addon = all::<Addon>()
+                .filter(|a| a != &Addon::None)
+                .choose(&mut thread_rng())
+                .unwrap();
+            *image = assets.load(format!("addons/{} Bubble.png", item.name()));
+            pickup.item = Some(item);
+
             *visibility = Visibility::Visible;
         }
     }

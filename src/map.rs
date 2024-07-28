@@ -213,12 +213,14 @@ pub fn spawn_map_system(
                 let collider = Collider::circle(0.5);
 
                 if attrs.get("class").map(Deref::deref) == Some("pickup") {
+
+                    let aspect = 782.0 / 868.0;
+
                     commands.spawn((
                         SpriteBundle {
-                            texture: asset_server.load("ducky.png"),
                             transform: Transform::from_translation(Vec3::new(cx, cy, 0.0)),
                             sprite: Sprite {
-                                custom_size: Some(Vec2::new(1.0, 1.0)),
+                                custom_size: Some(Vec2::new(1.0, 1.0 / aspect )),
                                 ..Default::default()
                             },
                             ..Default::default()
