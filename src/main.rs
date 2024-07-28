@@ -26,6 +26,7 @@ use bevy::prelude::*;
 use bevy::render::camera::ScalingMode;
 use bevy_egui::EguiPlugin;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
+use crate::addons::lasso::{FireLassoEvent, LassoPlugin};
 use crate::item_pickup::ItemPickupPlugin;
 use crate::ranking::{Progress, Rank, RankingPlugin};
 use crate::waypoint::Waypoint;
@@ -54,6 +55,7 @@ fn main() {
             GiraffePlugin,
             ItemPickupPlugin,
             RankingPlugin,
+            LassoPlugin,
         ))
         .insert_resource(Gravity(Vec2::new(0.0, 0.0)))
         .register_type::<BicycleParams>()
@@ -88,6 +90,7 @@ fn main() {
         )
         .insert_resource(PlayerConfig::default())
         .add_event::<PlayerConfigChangedEvent>()
+        .add_event::<FireLassoEvent>()
         .run();
 }
 

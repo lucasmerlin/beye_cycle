@@ -5,6 +5,7 @@ use bevy::prelude::Component;
 use enum_iterator::Sequence;
 use rand_derive2::RandGen;
 use crate::addons::giraffe::Giraffe;
+use crate::addons::lasso::LassoAddon;
 
 #[derive(Debug, Component)]
 pub struct AddonComponent;
@@ -58,7 +59,9 @@ impl BicycleModTrait for Addon {
                 commands.insert(Giraffe::default());
             }
             Addon::Hook => {}
-            Addon::Lasso => {}
+            Addon::Lasso => {
+                commands.insert(LassoAddon::default());
+            }
             Addon::Rocket => {}
         }
     }

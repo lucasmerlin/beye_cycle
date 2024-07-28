@@ -68,12 +68,10 @@ pub fn track_progress_system(
                 .expect("Next checkpoint not found");
 
             if target_checkpoint.index == 0 {
-                println!("Round completed");
                 progress.round += 1;
             }
             progress.checkpoint_idx = next_checkpoint_data.index;
 
-            dbg!(&progress.next_checkpoint, target_checkpoint.next);
             progress.next_checkpoint = target_checkpoint.next.unwrap();
 
 

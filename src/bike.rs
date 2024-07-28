@@ -125,7 +125,7 @@ pub fn spawn_player(
     let direction_right = direction.normalize().rotate(Vec2::from_angle(PI / 2.0));
 
     // Places enemies in a F1 like  grid
-    for i in 0..0 {
+    for i in 0..4 {
         let offset = direction.normalize() * (i as f32 * 2.0) + direction_right * (i as f32 % 2.0);
         spawn(false, offset);
     }
