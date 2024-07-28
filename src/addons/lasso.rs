@@ -1,6 +1,6 @@
 use crate::bike::Player;
 use crate::bike_config::ForBicycle;
-use crate::ranking::Rank;
+use crate::ranking::{Progress, Rank};
 use bevy::input::keyboard::KeyboardInput;
 use bevy::prelude::*;
 
@@ -17,8 +17,8 @@ impl Plugin for LassoPlugin {
                 lasso_hit_system,
             ),
         )
-            .add_event::<MovedToTargetEvent>()
-            .add_event::<FireLassoEvent>();
+        .add_event::<MovedToTargetEvent>()
+        .add_event::<FireLassoEvent>();
     }
 }
 
@@ -43,12 +43,14 @@ pub struct LassoCaughtAndMovingBack;
 
 #[derive(Debug, Component)]
 pub struct MoveToTarget {
-    target: Entity,
+    pub target: Entity,
+    pub speed: f32,
 }
 
 #[derive(Debug, Event)]
 pub struct MovedToTargetEvent {
-    entity: Entity,
+    pub entity: Entity,
+    pub target: Entity,
 }
 
 pub fn player_lasso_control_system(
@@ -94,6 +96,7 @@ pub fn fire_lasso_system(
                 },
                 MoveToTarget {
                     target: target_entity,
+                    speed: LASOO_SPEED,
                 },
                 SpriteBundle {
                     transform: Transform::from_translation(by_transform.translation()),
@@ -121,10 +124,10 @@ pub fn move_to_target_system(
         let distance = direction.length();
         let direction = direction.normalize();
 
-        transform.translation += direction * LASOO_SPEED;
+        transform.translation += direction * target.speed;
 
         if distance < 1.0 {
-            events.send(MovedToTargetEvent { entity });
+            events.send(MovedToTargetEvent { entity, target: target.target });
         }
     }
 }
@@ -134,18 +137,30 @@ pub fn lasso_hit_system(
     mut events: EventReader<MovedToTargetEvent>,
     lasso_query: Query<(&Lasso)>,
     moving_back_query: Query<(&LassoCaughtAndMovingBack)>,
+    mut progress_query: Query<(&mut Progress)>,
 ) {
     for event in events.read() {
         if let Ok(lasso) = lasso_query.get(event.entity) {
+            println!("Lasso hit target");
             commands.entity(event.entity).despawn_recursive();
 
-            commands
-                .entity(lasso.target)
-                .insert((MoveToTarget { target: lasso.by }, LassoCaughtAndMovingBack));
+            commands.entity(lasso.target).insert((
+                MoveToTarget {
+                    target: lasso.by,
+                    speed: LASOO_SPEED,
+                },
+                LassoCaughtAndMovingBack,
+            ));
         }
 
         if let Ok(_) = moving_back_query.get(event.entity) {
-            commands.entity(event.entity).remove::<(LassoCaughtAndMovingBack, MoveToTarget)>();
+            commands
+                .entity(event.entity)
+                .remove::<(LassoCaughtAndMovingBack, MoveToTarget)>();
+
+            let my_progress = progress_query.get_mut(event.target).unwrap().clone();
+            let mut target_progress = progress_query.get_mut(event.entity).unwrap();
+            *target_progress = my_progress;
         }
     }
 }

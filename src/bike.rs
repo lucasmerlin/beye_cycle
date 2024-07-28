@@ -32,6 +32,8 @@ pub fn spawn_player(
     asset_server: Res<AssetServer>,
     player_config: Res<PlayerConfig>,
     waypoint: Query<(Entity, &Waypoint, &Transform)>,
+
+    children_query: Query<&Children>,
 ) {
     let (first_waypoint_entity, first_waypoint, start_post) = waypoint.iter().next().unwrap();
 
@@ -77,7 +79,6 @@ pub fn spawn_player(
                 entity.insert(Player);
             } else {
                 entity.insert(WaypointAi {
-                    current_target: first_waypoint_entity,
                 });
             }
 
@@ -108,6 +109,7 @@ pub fn spawn_player(
                 container_id,
                 &player_config.0,
                 &asset_server,
+                &children_query,
             );
         } else {
             apply_config(
@@ -116,6 +118,7 @@ pub fn spawn_player(
                 container_id,
                 &random(),
                 &asset_server,
+                &children_query,
             );
         }
     };
@@ -139,6 +142,8 @@ pub fn apply_config_to_player(
     mut query: Query<(Entity, &mut BicycleParams, &Children), With<Player>>,
     config: Res<PlayerConfig>,
     assets: Res<AssetServer>,
+
+    children_query: Query<&Children>,
 ) {
     println!("apply_config_to_player");
 
@@ -146,7 +151,7 @@ pub fn apply_config_to_player(
     if let Some((player, params, children)) = player {
         let container = *children.first().unwrap();
 
-        apply_config(&mut commands, player, container, &config.0, &assets);
+        apply_config(&mut commands, player, container, &config.0, &assets, &children_query);
     }
 }
 
@@ -156,11 +161,18 @@ pub fn apply_config(
     container_entity: Entity,
     config: &CharacterConfig,
     assets: &Res<AssetServer>,
+    children_query: &Query<&Children>,
 ) {
     {
         let mut entity_commands = commands.entity(entity);
 
         entity_commands.insert(BicycleParams::default() * config.bike.frame.params());
+    }
+
+    if let Ok(children) = children_query.get(container_entity) {
+        for child in children.iter() {
+            commands.entity(*child).despawn_recursive();
+        }
     }
 
     let mut container_commands = commands.entity(container_entity);

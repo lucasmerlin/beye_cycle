@@ -17,7 +17,7 @@ impl Plugin for RankingPlugin {
 #[derive(Debug, Component, Reflect)]
 pub struct Rank(pub usize);
 
-#[derive(Debug, Component, Reflect)]
+#[derive(Debug, Component, Reflect, Clone)]
 pub struct Progress {
     pub round: usize,
     pub checkpoint_idx: usize,

@@ -26,6 +26,7 @@ use bevy::prelude::*;
 use bevy::render::camera::ScalingMode;
 use bevy_egui::EguiPlugin;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
+use crate::addons::hook::HookPlugin;
 use crate::addons::lasso::{FireLassoEvent, LassoPlugin};
 use crate::item_pickup::ItemPickupPlugin;
 use crate::ranking::{Progress, Rank, RankingPlugin};
@@ -56,6 +57,7 @@ fn main() {
             ItemPickupPlugin,
             RankingPlugin,
             LassoPlugin,
+            HookPlugin,
         ))
         .insert_resource(Gravity(Vec2::new(0.0, 0.0)))
         .register_type::<BicycleParams>()
