@@ -90,7 +90,6 @@ fn main() {
         )
         .insert_resource(PlayerConfig::default())
         .add_event::<PlayerConfigChangedEvent>()
-        .add_event::<FireLassoEvent>()
         .run();
 }
 

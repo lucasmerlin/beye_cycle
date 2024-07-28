@@ -8,7 +8,17 @@ pub struct LassoPlugin;
 
 impl Plugin for LassoPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, (player_lasso_control_system, fire_lasso_system, move_to_target_system));
+        app.add_systems(
+            Update,
+            (
+                player_lasso_control_system,
+                fire_lasso_system,
+                move_to_target_system,
+                lasso_hit_system,
+            ),
+        )
+            .add_event::<MovedToTargetEvent>()
+            .add_event::<FireLassoEvent>();
     }
 }
 
@@ -26,6 +36,19 @@ pub struct Lasso {
 #[derive(Debug, Event)]
 pub struct FireLassoEvent {
     by: Entity,
+}
+
+#[derive(Debug, Component)]
+pub struct LassoCaughtAndMovingBack;
+
+#[derive(Debug, Component)]
+pub struct MoveToTarget {
+    target: Entity,
+}
+
+#[derive(Debug, Event)]
+pub struct MovedToTargetEvent {
+    entity: Entity,
 }
 
 pub fn player_lasso_control_system(
@@ -57,7 +80,7 @@ pub fn fire_lasso_system(
         let mut target = None;
 
         for (entity, rank, transform) in target_query.iter_mut() {
-            if rank.0 == by_rank.0 + 1 {
+            if rank.0 == by_rank.0 - 1 {
                 target = Some((entity, transform.translation()));
                 break;
             }
@@ -68,6 +91,9 @@ pub fn fire_lasso_system(
                 Lasso {
                     target: target_entity,
                     by,
+                },
+                MoveToTarget {
+                    target: target_entity,
                 },
                 SpriteBundle {
                     transform: Transform::from_translation(by_transform.translation()),
@@ -84,16 +110,42 @@ pub fn fire_lasso_system(
 }
 
 pub fn move_to_target_system(
-    mut commands: Commands,
-    mut query: Query<(Entity, &Lasso, &mut Transform)>,
+    mut query: Query<(Entity, &MoveToTarget, &mut Transform)>,
     target_query: Query<(&GlobalTransform)>,
+    mut events: EventWriter<MovedToTargetEvent>,
 ) {
-    for (entity, lasso, mut transform) in query.iter_mut() {
-        let target_transform = target_query.get(lasso.target).unwrap();
+    for (entity, target, mut transform) in query.iter_mut() {
+        let target_transform = target_query.get(target.target).unwrap();
 
         let direction = target_transform.translation() - transform.translation;
+        let distance = direction.length();
         let direction = direction.normalize();
 
         transform.translation += direction * LASOO_SPEED;
+
+        if distance < 1.0 {
+            events.send(MovedToTargetEvent { entity });
+        }
+    }
+}
+
+pub fn lasso_hit_system(
+    mut commands: Commands,
+    mut events: EventReader<MovedToTargetEvent>,
+    lasso_query: Query<(&Lasso)>,
+    moving_back_query: Query<(&LassoCaughtAndMovingBack)>,
+) {
+    for event in events.read() {
+        if let Ok(lasso) = lasso_query.get(event.entity) {
+            commands.entity(event.entity).despawn_recursive();
+
+            commands
+                .entity(lasso.target)
+                .insert((MoveToTarget { target: lasso.by }, LassoCaughtAndMovingBack));
+        }
+
+        if let Ok(_) = moving_back_query.get(event.entity) {
+            commands.entity(event.entity).remove::<(LassoCaughtAndMovingBack, MoveToTarget)>();
+        }
     }
 }

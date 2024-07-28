@@ -25,7 +25,7 @@ pub struct Progress {
     pub next_checkpoint: Entity,
 }
 
-pub const NEXT_CHECKPOINT_DISTANCE: f32 = 10.0;
+pub const NEXT_CHECKPOINT_DISTANCE: f32 = 5.0;
 
 pub fn rank_bicycles_system(mut query: Query<(&Bicycle, &Progress, &mut Rank)>) {
     let mut all = query.iter_mut().collect::<Vec<_>>();
@@ -35,8 +35,8 @@ pub fn rank_bicycles_system(mut query: Query<(&Bicycle, &Progress, &mut Rank)>) 
             .cmp(&b.round)
             .then_with(|| a.checkpoint_idx.cmp(&b.checkpoint_idx))
             .then_with(|| {
-                a.distance_to_next_checkpoint
-                    .partial_cmp(&b.distance_to_next_checkpoint)
+                b.distance_to_next_checkpoint
+                    .partial_cmp(&a.distance_to_next_checkpoint)
                     .unwrap()
             })
     });

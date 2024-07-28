@@ -2,6 +2,7 @@ use crate::bike::{BicycleControl, Player};
 use crate::addons::giraffe::PooCollision;
 use avian2d::prelude::LinearVelocity;
 use bevy::prelude::*;
+use crate::ranking::NEXT_CHECKPOINT_DISTANCE;
 
 #[derive(Component, Debug, Reflect)]
 pub struct Waypoint {
@@ -37,7 +38,7 @@ pub fn follow_waypoint(
 
         let distance = direction.length();
 
-        if distance < 5.0 {
+        if distance < NEXT_CHECKPOINT_DISTANCE {
             if let Some(next) = waypoint_query.get(ai.current_target).unwrap().1.next {
                 ai.current_target = next;
             } else {
