@@ -12,6 +12,7 @@ use bevy_inspector_egui::reflect_inspector::InspectorUi;
 use rand::random;
 use std::any::Any;
 use std::f32::consts::PI;
+use crate::mods::giraffe::PooCollision;
 
 #[derive(Component, Debug)]
 pub struct Bicycle;
@@ -95,7 +96,7 @@ pub fn spawn_player(
     let direction_right = direction.normalize().rotate(Vec2::from_angle(PI / 2.0));
 
     // Places enemies in a F1 like  grid
-    for i in 0..10 {
+    for i in 0..4 {
         let offset = direction.normalize() * (i as f32 * 2.0) + direction_right * (i as f32 % 2.0);
         spawn(false, offset);
     }
@@ -355,7 +356,7 @@ pub fn drift_factor_system(mut query: Query<(&mut LinearVelocity, &Transform, &B
 pub fn control_player(
     mut commands: Commands,
     keyboard_input: Res<ButtonInput<KeyCode>>,
-    mut query: Query<(&mut BicycleControl), With<Player>>,
+    mut query: Query<(&mut BicycleControl), (With<Player>, Without<PooCollision>)>,
 ) {
     for (mut control) in query.iter_mut() {
         control.acceleration = 0.0;

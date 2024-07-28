@@ -43,7 +43,7 @@ fn main() {
                     ..default()
                 }),
             PhysicsPlugins::default().with_length_unit(1.0),
-            //PhysicsDebugPlugin::default(),
+            PhysicsDebugPlugin::default(),
             EguiPlugin,
             WorldInspectorPlugin::new(),
             GiraffePlugin,
