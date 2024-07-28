@@ -18,7 +18,7 @@ opt-level = 1
 opt-level = 3
 
 [dependencies]
-bevy = { version = "0.14", features = ["jpeg"] }
+bevy = { version = "0.14", features = ["jpeg", "webp"] }
 
 # We need the git version since in 0.1 there is a bug that causes the game to crash sometimes
 avian2d = { version = "0.1", git = "https://github.com/Jondolf/avian", features = ["debug-plugin"] }
