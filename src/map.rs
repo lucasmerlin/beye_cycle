@@ -30,7 +30,7 @@ pub fn spawn_map_system(
     //     ..Default::default()
     // });
 
-    let map = include_str!("../assets/level2.svg");
+    let map = include_str!("../assets/maps/Uphill Both Ways.svg");
     let svg = svg::read(map).unwrap();
 
     //let mut view_box = None;
@@ -58,7 +58,7 @@ pub fn spawn_map_system(
                     //     vec,
                     // );
 
-                    let map = asset_server.load(href.to_string());
+                    let map = asset_server.load(format!("maps/{}", href));
 
                     let width = attrs.get("width").unwrap().parse().unwrap();
                     let height = attrs.get("height").unwrap().parse::<f32>().unwrap();
