@@ -7,4 +7,57 @@
   <circle style="fill: rgb(107, 218, 85); transform-origin: 26.394px 13.974px;" cx="26.394" cy="13.974" r="0.198" class="pickup"/>
   <circle style="fill: rgb(107, 218, 85); transform-origin: 26.88px 14.96px;" cx="26.88" cy="14.96" r="0.198" class="pickup"/>
   <circle style="fill: rgb(107, 218, 85); transform-origin: 27.252px 15.756px;" cx="27.252" cy="15.756" r="0.198" class="pickup"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="15.739 27.423 17.957 31.211 14.365 37.682 14.269 32.642" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="26.096 43.323 20.177 44.702 18.105 44.561 16.208 43.294 14.815 41.259 14.394 37.309 21.1 38.556" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="17.264 30.791 23.105 33.39 19.188 34.558" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="21.193 33.238 27.992 33.373 24.008 35.92" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="25.833 33.96 32.5 30.877 31.259 35.105" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="31.542 31.952 35.265 27.834 35.211 31.017" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="34.613 29.205 36.299 22.884 36.869 26.39" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="36.214 25.1 34.49 18.278 37.416 22.529" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="32.088 17.177 35.261 19.873 34.949 17.321" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="29.304 15.992 33.011 17.712 33.795 14.62" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="35.824 18.125 33.807 14.647 36.125 14.571 37.03 14.891 38.757 16.465 39.22 18.521 38.391 22.707" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="38.432 21.483 38.576 24.707 37.47 23.302" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="41.019 28.917 38.839 25.679 38.72 27.286" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="38.26 23.669 39.183 26.687 37.888 25.265" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="39.074 26.817 43.358 29.548 45.499 32.494 45.978 34.136 46.039 35.809" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="41.771 32.193 45.829 35.369 44.435 32.52" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="38.061 31.603 42.568 32.307 40.428 30.426 39.322 30.975" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="34.506 33.341 38.806 31.436 35.648 31.099" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="32.14 36.848 35.353 32.483 32.306 33.621" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="32.489 35.664 31.299 40.604 30.069 37.52" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="31.293 39.298 31.741 42.627 30.293 41.029" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="34.599 45.865 31.263 41.543 28.152 43.736" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="24.498 43.315 29.538 43.84 27.063 42.05" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="37.75 36.688 39.113 36.464 40.435 36.704 41.527 37.269 42.439 38.061 42.976 39.882 43.088 42.185 42.704 42.818 41.574 43.513 40.42 43.872 39.019 43.74 37.833 43.023 36.861 42.133 36.102 40.807 36.05 39.645 36.442 38.703 36.989 37.681" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="20.516 21.914 21.281 20.509 22.626 18.889 23.253 18.308 24.314 18.31 26.459 18.975 28.575 19.956 30.307 21.39 31.556 23.216 31.396 25.015 30.658 26.624 28.939 28.254 27.054 29.037 24.808 29.456 22.701 29.079 21.647 28.554 20.546 27.194 19.919 25.494 20.003 23.77" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="10.241 44.245 10.149 33.656 9.861 31.759 5.513 37.783" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="9.959 43.199 10.681 45.963 9.093 45.055" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="10.135 44.901 12.368 47.55 10.572 47.005" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="11.158 46.556 16.083 48.885 13.126 48.78" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="14.419 48.385 20.261 48.804 17.295 49.697" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="18.607 49.042 25.119 47.769 29.054 48.453 33.137 49.875 26.161 50.312" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="31.791 49.659 37.921 50.318 34.058 51.513" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="36.447 50.467 42.939 49.403 40.656 52.156" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="41.683 50.176 45.462 47.638 44.729 50.799" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="44.305 48.826 46.326 45.684 48.168 43.799 47.901 47.669" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="47.406 44.961 49.867 41.246 50.034 44.654" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="49.133 43.087 50.773 37.012 51.786 41.056" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="50.661 38.751 50.386 31.351 52.741 36.384" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="50.848 33.165 49.596 28.208 52.21 30.372" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="50.956 31.434 47.232 25.87 51.16 26.633" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="48.747 27.647 44.282 25.259 43.247 23.968 42.72 22.347 42.982 20.162 47.21 22.935" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="43.006 20.714 43.126 17.173 45.388 19.013" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="43.387 17.977 42.195 13.465 45.952 15.114" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="42.725 14.092 39.895 11.154 43.866 10.884" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="40.708 11.621 36.574 9.988 40.049 8.7" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="37.779 10.155 33.178 9.818 35.978 8.37" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="34.205 9.592 24.944 12.413 29.711 9.011" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="21.535 13.076 25.345 12.214 22.068 11.135" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="17.058 15.484 14.053 18.765 14.702 16.175" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="14.556 17.835 12.353 22.482 12.513 19.013" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="12.639 21.112 12.099 24.638 10.345 28.526 9.83 22.994" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="10.802 26.905 9.682 32.303 8.709 29.694" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="18.461 15.407 22.419 12.302 17.459 12.938 15.342 16.33" class="collider"/>
 </svg>
