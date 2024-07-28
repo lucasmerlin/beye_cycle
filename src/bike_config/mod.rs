@@ -1,9 +1,9 @@
 pub mod addon;
 pub mod frame;
 
-use bevy::ecs::system::EntityCommands;
 use crate::bike_config::addon::Addon;
 use crate::bike_config::frame::BikeFrame;
+use bevy::ecs::system::EntityCommands;
 use bevy::math::Vec2;
 use bevy::prelude::{Component, Entity, Event, Resource};
 use enum_iterator::{all, Sequence};
@@ -37,27 +37,25 @@ pub trait BicycleModTrait {
     fn has_asset(&self) -> bool {
         true
     }
-    fn asset(&self) -> Option<String> {
+    fn asset(&self, menu: bool) -> Option<String> {
         if self.has_asset() {
             Some(format!("{}/{}.png", self.asset_folder(), self.name()))
         } else {
             None
         }
     }
-    fn bg_asset(&self) -> Option<String> {
+    fn bg_asset(&self, menu: bool) -> Option<String> {
         if self.has_asset() {
             Some(format!("{}/{} White.png", self.asset_folder(), self.name()))
         } else {
             None
         }
     }
-    fn asset_res(&self) -> Vec2;
-    fn asset_offset(&self) -> Vec2;
+    fn asset_res(&self, menu: bool) -> Vec2;
+    fn asset_offset(&self, menu: bool) -> Vec2;
     fn z_order(&self) -> f32;
 
-    fn spawn(&self, commands: &mut EntityCommands) {
-
-    }
+    fn spawn(&self, commands: &mut EntityCommands) {}
 }
 
 pub trait Selectable: Sequence {
@@ -116,24 +114,40 @@ impl BicycleModTrait for Skin {
         }
     }
 
-    fn asset(&self) -> Option<String> {
-        Some(format!("{}/{} Side.png", self.asset_folder(), self.name()))
+    fn asset(&self, menu: bool) -> Option<String> {
+        if menu {
+            Some(format!("{}/{}.png", self.asset_folder(), self.name()))
+        } else {
+            Some(format!("{}/{} Side.png", self.asset_folder(), self.name()))
+        }
     }
 
-    fn bg_asset(&self) -> Option<String> {
-        Some(format!("{}/{} Side White.png", self.asset_folder(), self.name()))
+    fn bg_asset(&self, menu: bool) -> Option<String> {
+        if menu {
+            Some(format!("{}/{} White.png", self.asset_folder(), self.name()))
+        } else {
+            Some(format!("{}/{} Side White.png", self.asset_folder(), self.name()))
+        }
     }
 
     fn asset_folder(&self) -> &'static str {
-        "skins_side"
+        "skins"
     }
 
-    fn asset_res(&self) -> Vec2 {
-        Vec2::new(861.0, 1151.0)
+    fn asset_res(&self, menu: bool) -> Vec2 {
+        if menu {
+            Vec2::new(1200.0, 1800.0)
+        } else {
+            Vec2::new(861.0, 1151.0)
+        }
     }
 
-    fn asset_offset(&self) -> Vec2 {
-        Vec2::new(-1.8, -0.9) / 3.0 + FRAME_OFFSET
+    fn asset_offset(&self, menu: bool) -> Vec2 {
+        if menu {
+            Vec2::new(-0.9, 2.0)
+        } else {
+            Vec2::new(-1.8, -0.9) / 3.0 + FRAME_OFFSET
+        }
     }
 
     fn z_order(&self) -> f32 {
@@ -170,11 +184,11 @@ impl BicycleModTrait for Hat {
         self != &Hat::None
     }
 
-    fn asset_res(&self) -> Vec2 {
+    fn asset_res(&self, menu: bool) -> Vec2 {
         todo!()
     }
 
-    fn asset_offset(&self) -> Vec2 {
+    fn asset_offset(&self, menu: bool) -> Vec2 {
         Vec2::ZERO
     }
 
@@ -213,11 +227,11 @@ impl BicycleModTrait for RearWheel {
         "rear_wheels"
     }
 
-    fn asset_res(&self) -> Vec2 {
+    fn asset_res(&self, menu: bool) -> Vec2 {
         Vec2::new(565.0, 515.0)
     }
 
-    fn asset_offset(&self) -> Vec2 {
+    fn asset_offset(&self, menu: bool) -> Vec2 {
         Vec2::new(0.7, -1.9) / 3.0 + FRAME_OFFSET
     }
 

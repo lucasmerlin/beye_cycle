@@ -1,3 +1,4 @@
+use crate::game_state::DespawnMe;
 use crate::item_pickup::ItemPickup;
 use crate::slow::Slow;
 use crate::waypoint::Waypoint;
@@ -73,15 +74,18 @@ pub fn spawn_map_system(
                     let mut map_transform = center.clone();
                     map_transform.translation.z = -1.0;
 
-                    commands.spawn(SpriteBundle {
-                        texture: map,
-                        transform: map_transform,
-                        sprite: Sprite {
-                            custom_size: Some(Vec2::new(width, height)),
+                    commands.spawn((
+                        SpriteBundle {
+                            texture: map,
+                            transform: map_transform,
+                            sprite: Sprite {
+                                custom_size: Some(Vec2::new(width, height)),
+                                ..Default::default()
+                            },
                             ..Default::default()
                         },
-                        ..Default::default()
-                    });
+                        DespawnMe,
+                    ));
 
                     let camera_scale = 0.013;
                     let mut camera = Camera2dBundle {
@@ -129,6 +133,7 @@ pub fn spawn_map_system(
                                 ..Default::default()
                             },
                             VisibilityBundle::default(),
+                            DespawnMe,
                         ));
 
                         if first.is_none() {
@@ -136,11 +141,14 @@ pub fn spawn_map_system(
                         }
 
                         entity.with_children(|commands| {
-                            commands.spawn((SpriteBundle {
-                                texture: asset_server.load("ducky.png"),
-                                transform: Transform::from_scale(Vec3::splat(0.01)),
-                                ..Default::default()
-                            },));
+                            commands.spawn((
+                                SpriteBundle {
+                                    texture: asset_server.load("ducky.png"),
+                                    transform: Transform::from_scale(Vec3::splat(0.01)),
+                                    ..Default::default()
+                                },
+                                DespawnMe,
+                            ));
                         });
 
                         prev = Some(entity.id());
@@ -199,12 +207,11 @@ pub fn spawn_map_system(
                     );
 
                     if classes.contains(&"collider") {
-                        commands.spawn((RigidBody::Static, collider));
+                        commands.spawn((RigidBody::Static, collider, DespawnMe));
                     } else if classes.contains(&"slow") {
-                        commands.spawn((collider, Slow));
+                        commands.spawn((collider, Slow, DespawnMe));
                     }
                 });
-
             }
             Event::Tag(tag::Circle, _, attrs) => {
                 let cx = attrs.get("cx").unwrap().parse().unwrap();
@@ -213,20 +220,20 @@ pub fn spawn_map_system(
                 let collider = Collider::circle(0.5);
 
                 if attrs.get("class").map(Deref::deref) == Some("pickup") {
-
                     let aspect = 782.0 / 868.0;
 
                     commands.spawn((
                         SpriteBundle {
                             transform: Transform::from_translation(Vec3::new(cx, cy, 0.0)),
                             sprite: Sprite {
-                                custom_size: Some(Vec2::new(1.0, 1.0 / aspect )),
+                                custom_size: Some(Vec2::new(1.0, 1.0 / aspect)),
                                 ..Default::default()
                             },
                             ..Default::default()
                         },
                         collider,
                         ItemPickup::default(),
+                        DespawnMe,
                     ));
                 }
             }

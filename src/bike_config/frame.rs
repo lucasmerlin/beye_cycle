@@ -29,11 +29,11 @@ impl BicycleModTrait for BikeFrame {
         "frames"
     }
 
-    fn asset_res(&self) -> Vec2 {
+    fn asset_res(&self, menu: bool) -> Vec2 {
         Vec2::new(1250.0, 800.0)
     }
 
-    fn asset_offset(&self) -> Vec2 {
+    fn asset_offset(&self, menu: bool) -> Vec2 {
         FRAME_OFFSET
     }
 

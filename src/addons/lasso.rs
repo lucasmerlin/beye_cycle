@@ -3,6 +3,7 @@ use crate::bike_config::ForBicycle;
 use crate::ranking::{Progress, Rank};
 use bevy::prelude::*;
 use rand::random;
+use crate::game_state::DespawnMe;
 
 pub struct LassoPlugin;
 
@@ -123,6 +124,7 @@ pub fn fire_lasso_system(
 
         if let Some((target_entity, target_position)) = target {
             commands.spawn((
+                DespawnMe,
                 Lasso {
                     target: target_entity,
                     by,

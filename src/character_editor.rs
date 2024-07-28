@@ -1,41 +1,35 @@
 use crate::bike_config::{BicycleModTrait, PlayerConfig, Selectable};
 use bevy::prelude::{DetectChangesMut, ResMut};
+use bevy_egui::egui::Ui;
 use bevy_egui::{egui, EguiContexts};
 use egui_extras::{Size, StripBuilder};
 use rand::{random, thread_rng, Rng};
 
-pub fn character_editor(mut contexts: EguiContexts, mut player: ResMut<PlayerConfig>) {
-    let ctx = contexts.ctx_mut();
+pub fn character_editor(ui: &mut Ui, mut player: &mut ResMut<PlayerConfig>) {
+    let config = player.bypass_change_detection();
+    let mut changed = false;
 
-    egui::Window::new("Character Editor").show(ctx, |ui| {
-        let config = player.bypass_change_detection();
-        let mut changed = false;
+    ui.heading("Character Editor");
+    if ui.button("Randomize All").clicked() {
+        *config = random();
+        changed = true;
+    };
 
-        ui.heading("Character Editor");
-        if ui.button("Randomize All").clicked() {
-            *config = random();
-            changed = true;
-        };
+    ui.label("Skin:");
+    changed |= select(ui, &mut config.0.skin);
 
-        ui.label("Skin:");
-        changed |= select(ui, &mut config.0.skin);
+    ui.label("Hat:");
+    changed |= select(ui, &mut config.0.hat);
 
-        ui.label("Hat:");
-        changed |= select(ui, &mut config.0.hat);
+    ui.label("Frame:");
+    changed |= select(ui, &mut config.0.bike.frame);
 
-        ui.label("Frame:");
-        changed |= select(ui, &mut config.0.bike.frame);
+    ui.label("Back Wheel:");
+    changed |= select(ui, &mut config.0.bike.rear_wheel);
 
-        ui.label("Back Wheel:");
-        changed |= select(ui, &mut config.0.bike.rear_wheel);
-
-        ui.label("Addon:");
-        changed |= select(ui, &mut config.0.bike.addon);
-
-        if changed {
-            player.set_changed();
-        }
-    });
+    if changed {
+        player.set_changed();
+    }
 }
 
 pub fn select(ui: &mut egui::Ui, item: &mut (impl Selectable + BicycleModTrait)) -> bool {

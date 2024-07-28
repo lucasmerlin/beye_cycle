@@ -74,6 +74,7 @@ pub fn item_collision_system(
                         &item,
                         &assets,
                         BicycleMod::Addon,
+                        false,
                     );
                 }
             }

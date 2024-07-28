@@ -1,4 +1,5 @@
 use crate::addons::giraffe::PooCollision;
+use crate::addons::rocket::RocketAddon;
 use crate::bike_config::{
     BicycleMod, BicycleModTrait, BikeConfig, CharacterConfig, ForBicycle, PlayerConfig, Selectable,
     FRAME_OFFSET,
@@ -17,7 +18,7 @@ use bevy_inspector_egui::reflect_inspector::InspectorUi;
 use rand::random;
 use std::any::Any;
 use std::f32::consts::PI;
-use crate::addons::rocket::RocketAddon;
+use crate::game_state::{DespawnMe, GameState};
 
 #[derive(Component, Debug)]
 pub struct Bicycle;
@@ -28,14 +29,17 @@ pub struct Player;
 #[derive(Component, Debug)]
 pub struct ModContainer;
 
-pub fn spawn_player(
+pub fn spawn_bikes(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     player_config: Res<PlayerConfig>,
     waypoint: Query<(Entity, &Waypoint, &Transform)>,
 
     children_query: Query<&Children>,
+    menu: Res<State<GameState>>,
 ) {
+    let menu = matches!(**menu, GameState::MainMenu);
+
     let (first_waypoint_entity, first_waypoint, start_post) = waypoint.iter().next().unwrap();
 
     let (next_waypoint_entity, next_waypoint, next_waypoint_transfrom) =
@@ -59,6 +63,7 @@ pub fn spawn_player(
                     distance_to_next_checkpoint: 0.0,
                 },
                 Rank(0),
+                DespawnMe,
                 RigidBody::Dynamic,
                 VisibilityBundle::default(),
                 Collider::capsule(GAME_BICYCLE_LENGTH / 10.0, GAME_BICYCLE_LENGTH),
@@ -79,8 +84,7 @@ pub fn spawn_player(
             if player {
                 entity.insert(Player);
             } else {
-                entity.insert(WaypointAi {
-                });
+                entity.insert(WaypointAi);
             }
 
             let mut container_id = None;
@@ -111,6 +115,7 @@ pub fn spawn_player(
                 &player_config.0,
                 &asset_server,
                 &children_query,
+                menu,
             );
         } else {
             apply_config(
@@ -120,6 +125,7 @@ pub fn spawn_player(
                 &random(),
                 &asset_server,
                 &children_query,
+                menu,
             );
         }
     };
@@ -145,6 +151,7 @@ pub fn apply_config_to_player(
     assets: Res<AssetServer>,
 
     children_query: Query<&Children>,
+    menu: Res<State<GameState>>,
 ) {
     println!("apply_config_to_player");
 
@@ -152,7 +159,15 @@ pub fn apply_config_to_player(
     if let Some((player, params, children)) = player {
         let container = *children.first().unwrap();
 
-        apply_config(&mut commands, player, container, &config.0, &assets, &children_query);
+        apply_config(
+            &mut commands,
+            player,
+            container,
+            &config.0,
+            &assets,
+            &children_query,
+            matches!(**menu, GameState::MainMenu),
+        );
     }
 }
 
@@ -163,6 +178,7 @@ pub fn apply_config(
     config: &CharacterConfig,
     assets: &Res<AssetServer>,
     children_query: &Query<&Children>,
+    menu: bool,
 ) {
     {
         let mut entity_commands = commands.entity(entity);
@@ -186,6 +202,7 @@ pub fn apply_config(
         &config.bike.frame,
         &assets,
         BicycleMod::Frame,
+        menu,
     );
 
     spawn_selectable(
@@ -194,6 +211,7 @@ pub fn apply_config(
         &config.bike.rear_wheel,
         &assets,
         BicycleMod::RearWheel,
+        menu,
     );
 
     spawn_selectable(
@@ -202,6 +220,7 @@ pub fn apply_config(
         &config.bike.addon,
         &assets,
         BicycleMod::Addon,
+        menu,
     );
 
     spawn_selectable(
@@ -210,6 +229,7 @@ pub fn apply_config(
         &config.skin,
         &assets,
         BicycleMod::Skin,
+        menu,
     );
 }
 
@@ -219,9 +239,10 @@ pub fn spawn_selectable(
     selectable: &impl BicycleModTrait,
     assets: &Res<AssetServer>,
     mod_type: BicycleMod,
+    menu: bool,
 ) {
-    let texture_res = selectable.asset_res();
-    let offset = selectable.asset_offset();
+    let texture_res = selectable.asset_res(menu);
+    let offset = selectable.asset_offset(menu);
     let z_order = selectable.z_order();
     let aspect = texture_res.x / texture_res.y;
     let game_length = texture_res.x / TEXTURE_BICYCLE_LENGTH * GAME_BICYCLE_LENGTH;
@@ -230,7 +251,7 @@ pub fn spawn_selectable(
     let rotation = Quat::from_rotation_z(PI / 2.0);
 
     commands.with_children(|commands| {
-        if let Some(asset) = selectable.asset() {
+        if let Some(asset) = selectable.asset(menu) {
             let mut entity = commands.spawn((
                 SpriteBundle {
                     texture: assets.load(asset),
@@ -248,7 +269,7 @@ pub fn spawn_selectable(
 
             selectable.spawn(&mut entity);
 
-            if let Some(bg) = selectable.bg_asset() {
+            if let Some(bg) = selectable.bg_asset(menu) {
                 entity.with_children(|commands| {
                     commands.spawn(
                         (SpriteBundle {
@@ -350,13 +371,17 @@ pub fn bike_controller_system(
     spatial_query: SpatialQuery,
     mut slow_query: Query<(&Slow)>,
 ) {
-    for (entity, control, params, velocity, mut transform, mut ext_force, mut damping, container) in query.iter_mut() {
+    for (entity, control, params, velocity, mut transform, mut ext_force, mut damping, container) in
+        query.iter_mut()
+    {
         ext_force.clear();
 
         let container = container.iter().next().unwrap();
         let container_children = children_query.get(*container).unwrap();
 
-        let has_rocket = container_children.iter().any(|entity| has_rocket_query.get(*entity).is_ok());
+        let has_rocket = container_children
+            .iter()
+            .any(|entity| has_rocket_query.get(*entity).is_ok());
 
         let intersections = spatial_query.point_intersections(
             Vector::new(transform.translation.x, transform.translation.y),

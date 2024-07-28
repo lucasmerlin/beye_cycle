@@ -3,6 +3,7 @@ use crate::bike_config::ForBicycle;
 use crate::waypoint::{follow_waypoint, WaypointAi};
 use avian2d::prelude::{Collider, Collision, LinearVelocity, RigidBody};
 use bevy::prelude::*;
+use crate::game_state::DespawnMe;
 
 pub struct GiraffePlugin;
 
@@ -102,6 +103,7 @@ pub fn spawn_poo(
     let offset = -bike_dir * (GAME_BICYCLE_LENGTH / 2.0 + 0.5);
 
     commands.spawn((
+        DespawnMe,
         SpriteBundle {
             transform: Transform::from_translation(bike_transform.translation() + offset),
             texture: assets.load("things/Scheyesse.png"),

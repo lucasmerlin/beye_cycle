@@ -1,4 +1,5 @@
 use crate::bike::Bicycle;
+use crate::game_state::GameState;
 use crate::waypoint::Waypoint;
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
@@ -9,7 +10,8 @@ impl Plugin for RankingPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            (track_progress_system, rank_bicycles_system, ranking_ui),
+            (track_progress_system, rank_bicycles_system, ranking_ui)
+                .run_if(in_state(GameState::Race)),
         );
     }
 }
@@ -62,7 +64,6 @@ pub fn track_progress_system(
         progress.distance_to_next_checkpoint = distance;
 
         if distance < NEXT_CHECKPOINT_DISTANCE {
-
             let (next_checkpoint_transform, next_checkpoint_data) = checkpoint_query
                 .get(progress.next_checkpoint)
                 .expect("Next checkpoint not found");
@@ -73,8 +74,6 @@ pub fn track_progress_system(
             progress.checkpoint_idx = next_checkpoint_data.index;
 
             progress.next_checkpoint = target_checkpoint.next.unwrap();
-
-
 
             progress.distance_to_next_checkpoint = transform
                 .translation()

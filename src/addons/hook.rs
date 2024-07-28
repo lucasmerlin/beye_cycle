@@ -4,6 +4,7 @@ use crate::bike_config::ForBicycle;
 use crate::ranking::{Progress, Rank};
 use bevy::prelude::*;
 use rand::random;
+use crate::game_state::DespawnMe;
 
 pub struct HookPlugin;
 
@@ -116,6 +117,7 @@ pub fn fire_hook_system(
 
         if let Some((target_entity, target_position)) = target {
             commands.spawn((
+                DespawnMe,
                 Hook {
                     target: target_entity,
                     by,

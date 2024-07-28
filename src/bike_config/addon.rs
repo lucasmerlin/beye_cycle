@@ -41,11 +41,11 @@ impl BicycleModTrait for Addon {
         self != &Addon::None
     }
 
-    fn asset_res(&self) -> Vec2 {
+    fn asset_res(&self, menu: bool) -> Vec2 {
         Vec2::new(728.0, 868.0)
     }
 
-    fn asset_offset(&self) -> Vec2 {
+    fn asset_offset(&self, menu: bool) -> Vec2 {
         Vec2::new(-1.5, -2.9) / 3.0 + FRAME_OFFSET
     }
 
