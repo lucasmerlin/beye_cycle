@@ -50,7 +50,7 @@ impl BicycleModTrait for Addon {
         match self {
             Addon::None => {}
             Addon::Giraffe => {
-                commands.insert(Giraffe);
+                commands.insert(Giraffe::default());
             }
             Addon::Hook => {}
             Addon::Lasso => {}
