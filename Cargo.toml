@@ -33,3 +33,5 @@ enum-iterator = { version = "2" }
 
 rand = "0.8"
 rand_derive2 = "0.1"
+
+bevy_tweening = "0.11.0"

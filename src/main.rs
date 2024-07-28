@@ -5,16 +5,18 @@
 #![allow(clippy::too_many_arguments, clippy::type_complexity)]
 
 mod bike;
-mod map;
-mod waypoint;
-mod slow;
+mod bike_config;
 mod camera;
 mod character_editor;
-mod bike_config;
+mod map;
 mod mods;
+mod slow;
+mod waypoint;
 
-use crate::bike::{BicycleParams, spawn_player};
+use crate::bike::{spawn_player, BicycleParams};
+use crate::bike_config::{PlayerConfig, PlayerConfigChangedEvent};
 use crate::map::spawn_map_system;
+use crate::mods::giraffe::GiraffePlugin;
 use avian2d::prelude::{Gravity, PhysicsDebugPlugin, PhysicsSet};
 use avian2d::PhysicsPlugins;
 use bevy::asset::AssetMetaCheck;
@@ -22,8 +24,6 @@ use bevy::prelude::*;
 use bevy::render::camera::ScalingMode;
 use bevy_egui::EguiPlugin;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
-use crate::bike_config::{PlayerConfig, PlayerConfigChangedEvent};
-use crate::mods::giraffe::GiraffePlugin;
 
 fn main() {
     App::new()
@@ -36,16 +36,13 @@ fn main() {
                 ..default()
             }),
             PhysicsPlugins::default().with_length_unit(1.0),
-           //PhysicsDebugPlugin::default(),
+            //PhysicsDebugPlugin::default(),
             EguiPlugin,
             WorldInspectorPlugin::new(),
-
             GiraffePlugin,
         ))
         .insert_resource(Gravity(Vec2::new(0.0, 0.0)))
-
         .register_type::<BicycleParams>()
-
         .add_systems(
             Startup,
             (
@@ -61,6 +58,7 @@ fn main() {
                 bike::drift_factor_system,
                 bike::bike_controller_system,
                 bike::apply_config_to_player.run_if(resource_changed::<PlayerConfig>),
+                bike::mirror_bike_system,
                 waypoint::follow_waypoint,
                 character_editor::character_editor,
             ),
@@ -71,10 +69,8 @@ fn main() {
                 .after(PhysicsSet::Sync)
                 .before(TransformSystem::TransformPropagate),
         )
-
         .insert_resource(PlayerConfig::default())
         .add_event::<PlayerConfigChangedEvent>()
-
         .run();
 }
 

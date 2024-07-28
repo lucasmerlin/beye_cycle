@@ -51,9 +51,9 @@ pub fn spawn_map_system(
                     let data = data_url::DataUrl::process(href).unwrap();
                     let (vec, meta) = data.decode_to_vec().unwrap();
 
-                    assets.insert_asset("embedded_map.png".into(), &Path::new("embedded_map.png"), vec);
+                    assets.insert_asset("embedded_map.jpeg".into(), &Path::new("embedded_map.jpeg"), vec);
 
-                    let map = asset_server.load("embedded://embedded_map.png");
+                    let map = asset_server.load("embedded://embedded_map.jpeg");
 
                     let width = attrs.get("width").unwrap().parse().unwrap();
                     let height = attrs.get("height").unwrap().parse::<f32>().unwrap();

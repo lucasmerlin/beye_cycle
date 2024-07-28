@@ -5,13 +5,13 @@ use bevy::ecs::system::EntityCommands;
 use crate::bike_config::addon::Addon;
 use crate::bike_config::frame::BikeFrame;
 use bevy::math::Vec2;
-use bevy::prelude::{Component, Event, Resource};
+use bevy::prelude::{Component, Entity, Event, Resource};
 use enum_iterator::{all, Sequence};
 use rand::prelude::IteratorRandom;
 use rand::thread_rng;
 use rand_derive2::RandGen;
 
-pub const FRAME_OFFSET: Vec2 = Vec2::new(-0.9, 0.0);
+pub const FRAME_OFFSET: Vec2 = Vec2::new(0.0, 0.0);
 
 #[derive(Debug, Resource, Default, RandGen)]
 pub struct PlayerConfig(pub CharacterConfig);
@@ -27,6 +27,9 @@ pub enum BicycleMod {
     Frame,
     Addon,
 }
+
+#[derive(Debug, Component)]
+pub struct ForBicycle(pub Entity);
 
 pub trait BicycleModTrait {
     fn name(&self) -> &'static str;

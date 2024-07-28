@@ -1,6 +1,4 @@
-use crate::bike_config::{
-    BicycleMod, BicycleModTrait, BikeConfig, CharacterConfig, PlayerConfig, Selectable,
-};
+use crate::bike_config::{BicycleMod, BicycleModTrait, BikeConfig, CharacterConfig, ForBicycle, FRAME_OFFSET, PlayerConfig, Selectable};
 use crate::slow::Slow;
 use crate::waypoint::{Waypoint, WaypointAi};
 use avian2d::math::Vector;
@@ -8,7 +6,7 @@ use avian2d::prelude::*;
 use bevy::ecs::system::EntityCommands;
 use bevy::prelude::*;
 use bevy_egui::egui;
-use bevy_egui::egui::{Id, Ui};
+use bevy_egui::egui::{Id, lerp, Ui};
 use bevy_inspector_egui::inspector_egui_impls::InspectorPrimitive;
 use bevy_inspector_egui::reflect_inspector::InspectorUi;
 use rand::random;
@@ -35,7 +33,7 @@ pub fn spawn_player(
     let direction = -(next_waypoint_transfrom.translation - start_post.translation).xy();
 
     let mut spawn = |player: bool, offset: Vec2| {
-        let id = {
+        let (player_id, container_id) = {
             let mut entity = commands.spawn((
                 Name::new(if player { "Player" } else { "Bot" }),
                 Bicycle,
@@ -67,13 +65,28 @@ pub fn spawn_player(
                     current_target: first_waypoint_entity,
                 });
             }
-            entity.id()
+
+            let mut container_id = None;
+
+            entity.with_children(|commands| {
+                container_id = Some(commands.spawn((
+                    TransformBundle {
+                        local: Transform::from_translation(Vec3::new(-0.9, 0.0, 0.0)),
+                      ..Default::default()
+                    },
+                    VisibilityBundle::default(),
+                )).id());
+            });
+
+            (entity.id(), container_id.unwrap())
         };
 
+
+
         if player {
-            apply_config(&mut commands, id, &player_config.0, &asset_server);
+            apply_config(&mut commands, player_id, container_id, &player_config.0, &asset_server);
         } else {
-            apply_config(&mut commands, id, &random(), &asset_server);
+            apply_config(&mut commands, player_id, container_id, &random(), &asset_server);
         }
     };
 
@@ -93,39 +106,50 @@ pub const GAME_BICYCLE_LENGTH: f32 = 2.0;
 
 pub fn apply_config_to_player(
     mut commands: Commands,
-    mut query: Query<(Entity, &mut BicycleParams), With<Player>>,
+    mut query: Query<(Entity, &mut BicycleParams, &Children), With<Player>>,
     config: Res<PlayerConfig>,
     assets: Res<AssetServer>,
 ) {
     println!("apply_config_to_player");
 
-    let (player, params) = query.iter_mut().next().unwrap();
+    let player = query.iter_mut().next();
+    if let Some((player, params, children)) = player {
 
-    apply_config(&mut commands, player, &config.0, &assets);
+        let container = *children.first().unwrap();
+
+        apply_config(&mut commands, player, container, &config.0, &assets);
+
+    }
 }
 
 pub fn apply_config(
     commands: &mut Commands,
     entity: Entity,
+    container_entity: Entity,
     config: &CharacterConfig,
     assets: &Res<AssetServer>,
 ) {
-    let mut entity_commands = commands.entity(entity);
+    {
+        let mut entity_commands = commands.entity(entity);
 
-    entity_commands.insert(BicycleParams::default() * config.bike.frame.params());
+        entity_commands.insert(BicycleParams::default() * config.bike.frame.params());
+    }
 
-    entity_commands.clear_children();
+    let mut container_commands = commands.entity(container_entity);
 
-    spawn_selectable(&mut entity_commands, &config.bike.frame, &assets, BicycleMod::Frame);
+    container_commands.clear_children();
 
-    spawn_selectable(&mut entity_commands, &config.bike.rear_wheel, &assets, BicycleMod::RearWheel);
+    spawn_selectable(entity, &mut container_commands, &config.bike.frame, &assets, BicycleMod::Frame);
 
-    spawn_selectable(&mut entity_commands, &config.bike.addon, &assets, BicycleMod::Addon);
+    spawn_selectable(entity, &mut container_commands, &config.bike.rear_wheel, &assets, BicycleMod::RearWheel);
 
-    spawn_selectable(&mut entity_commands, &config.skin, &assets, BicycleMod::Skin);
+    spawn_selectable(entity, &mut container_commands, &config.bike.addon, &assets, BicycleMod::Addon);
+
+    spawn_selectable(entity, &mut container_commands, &config.skin, &assets, BicycleMod::Skin);
 }
 
 fn spawn_selectable(
+    bicycle: Entity,
     commands: &mut EntityCommands,
     selectable: &impl BicycleModTrait,
     assets: &Res<AssetServer>,
@@ -154,6 +178,7 @@ fn spawn_selectable(
                     ..Default::default()
                 },
                 mod_type,
+                ForBicycle(bicycle),
             ));
 
             selectable.spawn(&mut entity);
@@ -347,6 +372,33 @@ pub fn control_player(
         }
         if keyboard_input.pressed(KeyCode::KeyD) || keyboard_input.pressed(KeyCode::ArrowRight) {
             control.turn -= 1.0;
+        }
+    }
+}
+
+
+// if the bike is going to the left, mirror it vertically
+pub fn mirror_bike_system(
+    mut query: Query<(&mut Transform, &Children), With<Bicycle>>,
+    mut child_query: Query<(&mut Transform), Without<Bicycle>>,
+) {
+    for ((mut transform, children)) in query.iter_mut() {
+        let rotation = transform.up().angle_between(Vec3::X);
+
+        for child in children.iter() {
+            if let Ok(mut child_transform) = child_query.get_mut(*child) {
+                if rotation > PI / 2.0 {
+                    if child_transform.scale.x > -1.0 {
+                        child_transform.scale.x -= 0.1;
+                        child_transform.translation.x = lerp(-0.45..=0.45, (-1.0 * child_transform.scale.x) / 2.0 + 0.5);
+                    }
+                } else {
+                    if child_transform.scale.x < 1.0 {
+                        child_transform.scale.x += 0.1;
+                        child_transform.translation.x = lerp(0.45..=-0.45, child_transform.scale.x / 2.0 + 0.5);
+                    }
+                }
+            }
         }
     }
 }
