@@ -2,7 +2,7 @@ use std::f32::consts::PI;
 use crate::bike::{Bicycle, BicycleParams, Player};
 use crate::bike_config::PlayerConfig;
 use crate::character_editor::character_editor;
-use crate::game_state::{GameState, RaceConfig, MAPS, DespawnMe};
+use crate::game_state::{GameState, RaceConfig, MAPS, DespawnMe, RaceState};
 use bevy::prelude::*;
 use bevy::render::camera::ScalingMode;
 use bevy_egui::egui::ComboBox;
@@ -13,6 +13,7 @@ pub fn main_menu_ui(
     mut race_config: ResMut<RaceConfig>,
     mut player_config: ResMut<PlayerConfig>,
     mut next_state: ResMut<NextState<GameState>>,
+    mut next_race_state: ResMut<NextState<RaceState>>,
 ) {
     let ctx = contexts.ctx_mut();
 
@@ -33,6 +34,7 @@ pub fn main_menu_ui(
 
         if ui.button("Start Race").clicked() {
             next_state.set(GameState::Race);
+            next_race_state.set(RaceState::Countdown);
         }
     });
 }

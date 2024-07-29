@@ -9,6 +9,15 @@ pub enum GameState {
     Race,
 }
 
+#[derive(Debug, States, Clone, Eq, PartialEq, Hash, Default)]
+pub enum RaceState {
+    #[default]
+    Countdown,
+    Pause,
+    Playing,
+    Finished,
+}
+
 #[derive(Debug, Resource)]
 pub struct RaceConfig {
     pub ai_count: usize,

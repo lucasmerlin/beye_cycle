@@ -78,7 +78,7 @@ pub fn spawn_bikes(
                         )),
                     ..Default::default()
                 },
-                LinearDamping::default(),
+                LinearDamping(10.0),
                 AngularDamping(10.0),
             ));
             if player {

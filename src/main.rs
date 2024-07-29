@@ -9,6 +9,7 @@ mod bike;
 mod bike_config;
 mod camera;
 mod character_editor;
+mod countdown;
 mod game_state;
 mod item_pickup;
 mod main_menu;
@@ -23,7 +24,8 @@ use crate::addons::lasso::{FireLassoEvent, LassoPlugin};
 use crate::addons::rocket;
 use crate::bike::{spawn_bikes, BicycleParams};
 use crate::bike_config::{PlayerConfig, PlayerConfigChangedEvent};
-use crate::game_state::{despawn_all, GameState, RaceConfig};
+use crate::countdown::RaceCountdown;
+use crate::game_state::{despawn_all, GameState, RaceConfig, RaceState};
 use crate::item_pickup::ItemPickupPlugin;
 use crate::map::spawn_map_system;
 use crate::ranking::{Progress, Rank, RankingPlugin};
@@ -70,6 +72,8 @@ fn main() {
         })
         .insert_resource(Gravity(Vec2::new(0.0, 0.0)))
         .insert_state(GameState::MainMenu)
+        .insert_state(RaceState::Countdown)
+        .insert_resource(RaceCountdown::default())
         .register_type::<BicycleParams>()
         .register_type::<Rank>()
         .register_type::<Progress>()
@@ -86,12 +90,16 @@ fn main() {
             Update,
             (
                 (
-                    bike::control_player,
-                    bike::drift_factor_system,
-                    bike::bike_controller_system,
+                    (
+                        bike::control_player,
+                        bike::drift_factor_system,
+                        bike::bike_controller_system,
+                        waypoint::follow_waypoint,
+                        rocket::despawn_rocket_system,
+                    )
+                        .run_if(in_state(RaceState::Playing)),
                     bike::mirror_bike_system,
-                    waypoint::follow_waypoint,
-                    rocket::despawn_rocket_system,
+                    countdown::countdown_ui,
                 )
                     .run_if(in_state(GameState::Race)),
                 bike::apply_config_to_player.run_if(resource_changed::<PlayerConfig>),

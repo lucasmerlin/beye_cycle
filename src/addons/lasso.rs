@@ -1,9 +1,9 @@
 use crate::bike::{Bicycle, Player};
 use crate::bike_config::ForBicycle;
+use crate::game_state::{DespawnMe, RaceState};
 use crate::ranking::{Progress, Rank};
 use bevy::prelude::*;
 use rand::random;
-use crate::game_state::DespawnMe;
 
 pub struct LassoPlugin;
 
@@ -12,8 +12,8 @@ impl Plugin for LassoPlugin {
         app.add_systems(
             Update,
             (
-                player_lasso_control_system,
-                fire_lasso_system,
+                (player_lasso_control_system, fire_lasso_system)
+                    .run_if(in_state(RaceState::Playing)),
                 move_to_target_system,
                 lasso_hit_system,
                 ai_lasso_control_system,
@@ -86,7 +86,13 @@ pub fn player_lasso_control_system(
 
 pub fn ai_lasso_control_system(
     mut commands: Commands,
-    mut query: Query<(Entity, &mut LassoAddon, &GlobalTransform, &ForBicycle, &Parent)>,
+    mut query: Query<(
+        Entity,
+        &mut LassoAddon,
+        &GlobalTransform,
+        &ForBicycle,
+        &Parent,
+    )>,
     mut is_not_player_query: Query<&Bicycle, Without<Player>>,
     mut events: EventWriter<FireLassoEvent>,
     time: Res<Time>,

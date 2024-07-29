@@ -1,9 +1,9 @@
 use crate::bike::{control_player, Bicycle, BicycleControl, Player, GAME_BICYCLE_LENGTH};
 use crate::bike_config::ForBicycle;
+use crate::game_state::{DespawnMe, RaceState};
 use crate::waypoint::{follow_waypoint, WaypointAi};
 use avian2d::prelude::{Collider, Collision, LinearVelocity, RigidBody};
 use bevy::prelude::*;
-use crate::game_state::DespawnMe;
 
 pub struct GiraffePlugin;
 
@@ -12,8 +12,8 @@ impl Plugin for GiraffePlugin {
         app.add_systems(
             Update,
             (
-                giraffe_player_control_system,
-                giraffe_ai_control_system,
+                (giraffe_player_control_system, giraffe_ai_control_system)
+                    .run_if(in_state(RaceState::Playing)),
                 poo_collision.after(control_player).after(follow_waypoint),
                 poo_collision_update,
             ),

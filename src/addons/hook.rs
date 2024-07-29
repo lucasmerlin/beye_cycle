@@ -4,7 +4,7 @@ use crate::bike_config::ForBicycle;
 use crate::ranking::{Progress, Rank};
 use bevy::prelude::*;
 use rand::random;
-use crate::game_state::DespawnMe;
+use crate::game_state::{DespawnMe, RaceState};
 
 pub struct HookPlugin;
 
@@ -13,8 +13,8 @@ impl Plugin for HookPlugin {
         app.add_systems(
             Update,
             (
-                player_hook_control_system,
-                fire_hook_system,
+                (player_hook_control_system,
+                fire_hook_system).run_if(in_state(RaceState::Playing)),
                 hook_hit_system,
                 ai_hook_control_system,
             ),
