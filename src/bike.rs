@@ -79,7 +79,7 @@ pub fn spawn_bikes(
                     local: start_post.clone()
                         * Transform::from_translation(Vec3::new(offset.x, offset.y, 0.0))
                         * Transform::from_rotation(Quat::from_rotation_z(
-                            direction.angle_between(Vec2::Y),
+                            -direction.angle_between(-Vec2::Y),
                         )),
                     ..Default::default()
                 },
@@ -144,8 +144,8 @@ pub fn spawn_bikes(
     // Places enemies in a F1 like  grid
     for i in 0..race_config.ai_count + 1 {
         // This makes a mess but is better than bikes off the track
-        let offset_i = usize::min(i, 5);
-        let offset = direction.normalize() * (offset_i as f32 * 2.0) + direction_right * (offset_i as f32 % 2.0);
+        let offset_i = usize::min(i, 8);
+        let offset = direction.normalize() * (offset_i as f32 * 1.4) + direction_right * (offset_i as f32 % 2.0);
         spawn(i == 0, offset);
     }
 }
