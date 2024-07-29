@@ -5,7 +5,7 @@ use crate::bike_config::addon::Addon;
 use crate::bike_config::frame::BikeFrame;
 use bevy::ecs::system::EntityCommands;
 use bevy::math::Vec2;
-use bevy::prelude::{Component, Entity, Event, Resource};
+use bevy::prelude::{AssetServer, Component, Entity, Event, Res, Resource};
 use enum_iterator::{all, Sequence};
 use rand::prelude::IteratorRandom;
 use rand::thread_rng;
@@ -55,7 +55,7 @@ pub trait BicycleModTrait {
     fn asset_offset(&self, menu: bool) -> Vec2;
     fn z_order(&self) -> f32;
 
-    fn spawn(&self, commands: &mut EntityCommands) {}
+    fn spawn(&self, commands: &mut EntityCommands,  assets: &Res<AssetServer>) {}
 }
 
 pub trait Selectable: Sequence {

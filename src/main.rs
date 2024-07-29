@@ -111,6 +111,7 @@ fn main() {
                     .run_if(in_state(GameState::Race)),
                 bike::apply_config_to_player.run_if(resource_changed::<PlayerConfig>),
                 main_menu::main_menu_ui.run_if(in_state(GameState::MainMenu)),
+                click_sound_system,
             ),
         )
         .add_systems(
@@ -124,4 +125,18 @@ fn main() {
         .insert_resource(RaceConfig::default())
         .add_event::<PlayerConfigChangedEvent>()
         .run();
+}
+
+
+pub fn click_sound_system(
+    mut commands: Commands,
+    input: Res<ButtonInput<MouseButton>>,
+    assets: Res<AssetServer>,
+) {
+    if input.just_pressed(MouseButton::Left) {
+        commands.spawn(AudioBundle {
+            source: assets.load("sounds/click.mp3"),
+            ..Default::default()
+        });
+    }
 }

@@ -102,6 +102,14 @@ pub fn spawn_poo(
 
     let offset = -bike_dir * (GAME_BICYCLE_LENGTH / 2.0 + 0.5);
 
+
+    commands.spawn((
+        AudioBundle {
+            source: assets.load("sounds/poop.mp3"),
+            settings: PlaybackSettings::DESPAWN,
+        }
+    ));
+
     commands.spawn((
         DespawnMe,
         SpriteBundle {

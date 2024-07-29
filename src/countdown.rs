@@ -1,4 +1,5 @@
-use crate::game_state::{RaceConfig, RaceState};
+use crate::game_state::{DespawnMe, RaceConfig, RaceState};
+use bevy::audio::Volume;
 use bevy::prelude::*;
 use bevy_egui::egui::load::SizedTexture;
 use bevy_egui::egui::{Align2, Frame, Id};
@@ -8,12 +9,14 @@ use bevy_inspector_egui::egui::Area;
 #[derive(Resource)]
 pub struct RaceCountdown {
     timer: Timer,
+    count: i32,
 }
 
 impl Default for RaceCountdown {
     fn default() -> Self {
         Self {
-            timer: Timer::from_seconds(5.0, TimerMode::Once),
+            timer: Timer::from_seconds(1.0, TimerMode::Repeating),
+            count: 5,
         }
     }
 }
@@ -23,6 +26,7 @@ pub fn race_setup(mut countdown: ResMut<RaceCountdown>) {
 }
 
 pub fn countdown_ui(
+    mut commands: Commands,
     assets: Res<AssetServer>,
     mut egui: EguiContexts,
     race_state: Res<State<RaceState>>,
@@ -40,7 +44,31 @@ pub fn countdown_ui(
 
     if **race_state == RaceState::Countdown {
         race_countdown.timer.tick(time.delta());
-        let second = race_countdown.timer.remaining_secs().floor() as u32;
+        if race_countdown.timer.just_finished() {
+            race_countdown.count -= 1;
+
+            if race_countdown.count == 1 {
+                commands.spawn((AudioBundle {
+                    source: assets.load("sounds/go.mp3"),
+                    settings: PlaybackSettings::default(),
+                },));
+            } else if race_countdown.count == 0 {
+                next_race_state.set(RaceState::Playing);
+                commands.spawn((
+                    AudioBundle {
+                        source: assets.load("sounds/bike.mp3"),
+                        settings: PlaybackSettings::LOOP.with_volume(Volume::new(1.5)),
+                    },
+                    DespawnMe,
+                ));
+            } else {
+                commands.spawn((AudioBundle {
+                    source: assets.load("sounds/countdown.mp3"),
+                    settings: PlaybackSettings::default(),
+                },));
+            }
+        }
+        let second = race_countdown.count - 1;
 
         Area::new(Id::new("Countdown"))
             .anchor(Align2::CENTER_CENTER, [0.0, 0.0])
@@ -54,9 +82,5 @@ pub fn countdown_ui(
                     ui.image(SizedTexture::new(*image, egui::Vec2::new(500.0, 250.0)));
                 }
             });
-
-        if race_countdown.timer.finished() {
-            next_race_state.set(RaceState::Playing);
-        }
     }
 }

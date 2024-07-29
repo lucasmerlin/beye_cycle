@@ -82,6 +82,8 @@ pub fn track_progress_system(
 }
 
 pub fn check_finish(
+    mut commands: Commands,
+    assets: Res<AssetServer>,
     race_config: Res<RaceConfig>,
     mut next_race_state: ResMut<NextState<RaceState>>,
     player_progress_query: Query<(&Player, &Progress)>,
@@ -89,6 +91,13 @@ pub fn check_finish(
     if let Some((_, progress)) = player_progress_query.iter().next() {
         if progress.round > race_config.laps {
             next_race_state.set(RaceState::Finished);
+
+            commands.spawn((
+                AudioBundle {
+                    source: assets.load("sounds/finish.mp3"),
+                    settings: PlaybackSettings::DESPAWN,
+                }
+            ));
         }
     }
 }

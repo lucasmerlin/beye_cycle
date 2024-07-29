@@ -286,7 +286,7 @@ pub fn spawn_selectable(
                 ForBicycle(bicycle),
             ));
 
-            selectable.spawn(&mut entity);
+            selectable.spawn(&mut entity, assets);
 
             if let Some(bg) = selectable.bg_asset(menu) {
                 entity.with_children(|commands| {

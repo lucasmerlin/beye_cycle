@@ -183,6 +183,7 @@ pub fn lasso_hit_system(
     lasso_query: Query<(&Lasso)>,
     moving_back_query: Query<(&LassoCaughtAndMovingBack)>,
     mut progress_query: Query<(&mut Progress)>,
+    assets: Res<AssetServer>,
 ) {
     for event in events.read() {
         if let Ok(lasso) = lasso_query.get(event.entity) {
@@ -195,6 +196,13 @@ pub fn lasso_hit_system(
                     speed: LASOO_SPEED,
                 },
                 LassoCaughtAndMovingBack,
+            ));
+
+            commands.spawn((
+                AudioBundle {
+                    source: assets.load("sounds/lasso.mp3"),
+                    settings: PlaybackSettings::DESPAWN,
+                }
             ));
         }
 

@@ -1,13 +1,14 @@
-use bevy::ecs::system::EntityCommands;
-use crate::bike_config::{BicycleModTrait, FRAME_OFFSET};
-use bevy::math::Vec2;
-use bevy::prelude::Component;
-use enum_iterator::Sequence;
-use rand_derive2::RandGen;
+use bevy::audio::{AudioBundle, Volume};
 use crate::addons::giraffe::Giraffe;
 use crate::addons::hook::HookAddon;
 use crate::addons::lasso::LassoAddon;
 use crate::addons::rocket::RocketAddon;
+use crate::bike_config::{BicycleModTrait, FRAME_OFFSET};
+use bevy::ecs::system::EntityCommands;
+use bevy::math::Vec2;
+use bevy::prelude::{AssetServer, Component, PlaybackSettings, Res};
+use enum_iterator::Sequence;
+use rand_derive2::RandGen;
 
 #[derive(Debug, Component)]
 pub struct AddonComponent;
@@ -53,7 +54,7 @@ impl BicycleModTrait for Addon {
         30.0
     }
 
-    fn spawn(&self, commands: &mut EntityCommands) {
+    fn spawn(&self, commands: &mut EntityCommands, assets: &Res<AssetServer>) {
         commands.insert(AddonComponent);
         match self {
             Addon::None => {}
@@ -67,7 +68,13 @@ impl BicycleModTrait for Addon {
                 commands.insert(LassoAddon::default());
             }
             Addon::Rocket => {
-                commands.insert(RocketAddon::default());
+                commands.insert((
+                    RocketAddon::default(),
+                    AudioBundle {
+                        source: assets.load("sounds/rocket.mp3"),
+                        settings: PlaybackSettings::REMOVE.with_volume(Volume::new(0.5)),
+                    },
+                ));
             }
         }
     }

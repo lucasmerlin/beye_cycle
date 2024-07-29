@@ -66,7 +66,7 @@ pub fn spawn_map_system(
                     //     vec,
                     // );
 
-                    let map = asset_server.load(format!("maps/{}", href));
+                    let map_image = asset_server.load(format!("maps/{}", href));
 
                     let width = attrs.get("width").unwrap().parse().unwrap();
                     let height = attrs.get("height").unwrap().parse::<f32>().unwrap();
@@ -83,13 +83,17 @@ pub fn spawn_map_system(
 
                     commands.spawn((
                         SpriteBundle {
-                            texture: map,
+                            texture: map_image,
                             transform: map_transform,
                             sprite: Sprite {
                                 custom_size: Some(Vec2::new(width, height)),
                                 ..Default::default()
                             },
                             ..Default::default()
+                        },
+                        AudioBundle {
+                            source: asset_server.load(format!("music/{}.mp3", race_config.map)),
+                            settings: PlaybackSettings::LOOP,
                         },
                         DespawnMe,
                     ));

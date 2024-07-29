@@ -146,6 +146,7 @@ pub fn hook_hit_system(
     hook_query: Query<(&Hook)>,
     moving_back_query: Query<(&HookCaughtAndMovingBack)>,
     mut progress_query: Query<(&mut Progress)>,
+    assets: Res<AssetServer>,
 ) {
     for event in events.read() {
         if let Ok(hook) = hook_query.get(event.entity) {
@@ -158,6 +159,14 @@ pub fn hook_hit_system(
                     speed: HOOK_SPEED,
                 },
                 HookCaughtAndMovingBack,
+            ));
+
+
+            commands.spawn((
+                AudioBundle {
+                    source: assets.load("sounds/hook.mp3"),
+                    settings: PlaybackSettings::DESPAWN,
+                }
             ));
         }
 
