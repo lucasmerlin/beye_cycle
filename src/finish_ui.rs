@@ -40,13 +40,13 @@ pub fn finish_ui(
                     }
 
                     let map_idx = MAPS.iter().position(|map| map == &race_config.map).unwrap();
-                    if let Some(next_map) = MAPS.get(map_idx + 1) {
-                        if ui.button("Next Map").clicked() {
-                            next_game_state.set(GameState::Restart);
-                            race_config.map = next_map.to_string();
-                        }
-                    } else {
-                        if race_config.is_cup {
+                    if race_config.is_cup {
+                        if let Some(next_map) = MAPS.get(map_idx + 1) {
+                            if ui.button("Next Map").clicked() {
+                                next_game_state.set(GameState::Restart);
+                                race_config.map = next_map.to_string();
+                            }
+                        } else {
                             ui.heading(
                                 "Yay! You finished the cup and unlocked the level selector!",
                             );

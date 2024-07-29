@@ -4,6 +4,7 @@ use crate::bike_config::{
     BicycleMod, BicycleModTrait, BikeConfig, CharacterConfig, ForBicycle, PlayerConfig, Selectable,
     FRAME_OFFSET,
 };
+use crate::game_state::{DespawnMe, GameState, RaceConfig};
 use crate::ranking::{Progress, Rank};
 use crate::slow::Slow;
 use crate::waypoint::{Waypoint, WaypointAi};
@@ -18,7 +19,6 @@ use bevy_inspector_egui::reflect_inspector::InspectorUi;
 use rand::random;
 use std::any::Any;
 use std::f32::consts::PI;
-use crate::game_state::{DespawnMe, GameState};
 
 #[derive(Component, Debug)]
 pub struct Bicycle;
@@ -37,10 +37,15 @@ pub fn spawn_bikes(
 
     children_query: Query<&Children>,
     menu: Res<State<GameState>>,
+    race_config: Res<RaceConfig>,
 ) {
     let menu = matches!(**menu, GameState::MainMenu);
 
-    let (first_waypoint_entity, first_waypoint, start_post) = waypoint.iter().next().unwrap();
+    let (first_waypoint_entity, first_waypoint, start_post) = waypoint
+        .iter()
+        .sort_by_key::<&Waypoint, _>(|data| data.index)
+        .next()
+        .unwrap();
 
     let (next_waypoint_entity, next_waypoint, next_waypoint_transfrom) =
         waypoint.get(first_waypoint.next.unwrap()).unwrap();
@@ -66,7 +71,7 @@ pub fn spawn_bikes(
                 DespawnMe,
                 RigidBody::Dynamic,
                 VisibilityBundle::default(),
-                Collider::capsule(GAME_BICYCLE_LENGTH / 10.0, GAME_BICYCLE_LENGTH),
+                Collider::capsule(GAME_BICYCLE_LENGTH / 20.0, GAME_BICYCLE_LENGTH),
                 // This was just the initial size I chose when first testing bike params
                 Mass(0.2 * 2.0),
                 ExternalForce::default(),
@@ -118,11 +123,15 @@ pub fn spawn_bikes(
                 menu,
             );
         } else {
+            let mut config: CharacterConfig = random();
+            while config.skin == player_config.0.skin {
+                config = random();
+            }
             apply_config(
                 &mut commands,
                 player_id,
                 container_id,
-                &random(),
+                &config,
                 &asset_server,
                 &children_query,
                 menu,
@@ -130,14 +139,14 @@ pub fn spawn_bikes(
         }
     };
 
-    spawn(true, Vec2::new(0.0, 0.0));
-
     let direction_right = direction.normalize().rotate(Vec2::from_angle(PI / 2.0));
 
     // Places enemies in a F1 like  grid
-    for i in 0..4 {
-        let offset = direction.normalize() * (i as f32 * 2.0) + direction_right * (i as f32 % 2.0);
-        spawn(false, offset);
+    for i in 0..race_config.ai_count + 1 {
+        // This makes a mess but is better than bikes off the track
+        let offset_i = usize::min(i, 5);
+        let offset = direction.normalize() * (offset_i as f32 * 2.0) + direction_right * (offset_i as f32 % 2.0);
+        spawn(i == 0, offset);
     }
 }
 

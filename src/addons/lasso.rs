@@ -122,7 +122,7 @@ pub fn fire_lasso_system(
         let mut target = None;
 
         for (entity, rank, transform) in target_query.iter_mut() {
-            if rank.0 == by_rank.0 - 1 {
+            if rank.0 + 1 == by_rank.0 {
                 target = Some((entity, transform.translation()));
                 break;
             }

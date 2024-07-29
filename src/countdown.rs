@@ -1,7 +1,7 @@
-use crate::game_state::RaceState;
+use crate::game_state::{RaceConfig, RaceState};
 use bevy::prelude::*;
 use bevy_egui::egui::load::SizedTexture;
-use bevy_egui::egui::{Align2, Id};
+use bevy_egui::egui::{Align2, Frame, Id};
 use bevy_egui::{egui, EguiContexts};
 use bevy_inspector_egui::egui::Area;
 
@@ -18,9 +18,7 @@ impl Default for RaceCountdown {
     }
 }
 
-pub fn race_setup(
-    mut countdown: ResMut<RaceCountdown>
-) {
+pub fn race_setup(mut countdown: ResMut<RaceCountdown>) {
     countdown.timer.reset();
 }
 
@@ -31,6 +29,7 @@ pub fn countdown_ui(
     mut next_race_state: ResMut<NextState<RaceState>>,
     mut images: Local<Vec<egui::TextureId>>,
     mut race_countdown: ResMut<RaceCountdown>,
+    race_config: Res<RaceConfig>,
     time: Res<Time>,
 ) {
     if images.is_empty() {
@@ -48,6 +47,10 @@ pub fn countdown_ui(
             .show(egui.ctx_mut(), |ui| {
                 let image = images.get(second as usize);
                 if let Some(image) = image {
+                    Frame::window(ui.style()).show(ui, |ui| {
+                        ui.label("Track:");
+                        ui.heading(&race_config.map);
+                    });
                     ui.image(SizedTexture::new(*image, egui::Vec2::new(500.0, 250.0)));
                 }
             });

@@ -147,17 +147,6 @@ pub fn spawn_map_system(
                             first = Some(entity.id());
                         }
 
-                        entity.with_children(|commands| {
-                            commands.spawn((
-                                SpriteBundle {
-                                    texture: asset_server.load("ducky.png"),
-                                    transform: Transform::from_scale(Vec3::splat(0.01)),
-                                    ..Default::default()
-                                },
-                                DespawnMe,
-                            ));
-                        });
-
                         prev = Some(entity.id());
                     }
                 }

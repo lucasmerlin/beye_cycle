@@ -28,25 +28,33 @@ pub struct RaceConfig {
     pub is_cup: bool,
 }
 
-#[derive(Debug, Resource, Default)]
+#[derive(Debug, Resource)]
 pub struct GameConfig {
     pub level_selector_unlocked: bool,
 }
 
-pub const MAPS: [&str; 3] = ["Milky Way", "Uphill Both Ways", "Pool"];
+impl Default for GameConfig {
+    fn default() -> Self {
+        Self {
+            level_selector_unlocked: false,
+        }
+    }
+}
+
+pub const MAPS: [&str; 3] = ["Pool", "Uphill Both Ways", "Milky Way"];
 pub const MAP_DATA: [&str; 3] = [
-    include_str!("../assets/maps/Milky Way.svg"),
-    include_str!("../assets/maps/Uphill Both Ways.svg"),
     include_str!("../assets/maps/Pool.svg"),
+    include_str!("../assets/maps/Uphill Both Ways.svg"),
+    include_str!("../assets/maps/Milky Way.svg"),
 ];
 
 impl Default for RaceConfig {
     fn default() -> Self {
         Self {
-            ai_count: 3,
+            ai_count: 4,
             map: MAPS[0].to_string(),
-            laps: 1,
-            is_cup: true,
+            laps: 3,
+            is_cup: false,
         }
     }
 }
