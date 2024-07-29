@@ -54,7 +54,7 @@ impl Default for RaceConfig {
             ai_count: 4,
             map: MAPS[0].to_string(),
             laps: 3,
-            is_cup: false,
+            is_cup: true,
         }
     }
 }
