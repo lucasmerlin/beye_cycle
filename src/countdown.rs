@@ -34,7 +34,7 @@ pub fn countdown_ui(
 ) {
     if images.is_empty() {
         for i in 0..4 {
-            images.push(egui.add_image(assets.load(format!("countdown/{}.png", i))));
+            images.push(egui.add_image(assets.load(format!("countdown/{}.webp", i))));
         }
     }
 

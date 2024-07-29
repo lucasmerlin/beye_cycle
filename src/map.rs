@@ -24,7 +24,7 @@ pub fn spawn_map_system(
     assets: ResMut<EmbeddedAssetRegistry>,
     race_config: Res<RaceConfig>,
 ) {
-    // let texture_handle = asset_server.load("map.png");
+    // let texture_handle = asset_server.load("map.webp");
     // let transform = Transform::from_scale(Vec3::splat(1.0 / 20.0));
     // commands.spawn(SpriteBundle {
     //     texture: texture_handle,

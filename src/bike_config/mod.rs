@@ -39,14 +39,14 @@ pub trait BicycleModTrait {
     }
     fn asset(&self, menu: bool) -> Option<String> {
         if self.has_asset() {
-            Some(format!("{}/{}.png", self.asset_folder(), self.name()))
+            Some(format!("{}/{}.webp", self.asset_folder(), self.name()))
         } else {
             None
         }
     }
     fn bg_asset(&self, menu: bool) -> Option<String> {
         if self.has_asset() {
-            Some(format!("{}/{} White.png", self.asset_folder(), self.name()))
+            Some(format!("{}/{} White.webp", self.asset_folder(), self.name()))
         } else {
             None
         }
@@ -116,17 +116,17 @@ impl BicycleModTrait for Skin {
 
     fn asset(&self, menu: bool) -> Option<String> {
         if menu {
-            Some(format!("{}/{}.png", self.asset_folder(), self.name()))
+            Some(format!("{}/{}.webp", self.asset_folder(), self.name()))
         } else {
-            Some(format!("{}/{} Side.png", self.asset_folder(), self.name()))
+            Some(format!("{}/{} Side.webp", self.asset_folder(), self.name()))
         }
     }
 
     fn bg_asset(&self, menu: bool) -> Option<String> {
         if menu {
-            Some(format!("{}/{} White.png", self.asset_folder(), self.name()))
+            Some(format!("{}/{} White.webp", self.asset_folder(), self.name()))
         } else {
-            Some(format!("{}/{} Side White.png", self.asset_folder(), self.name()))
+            Some(format!("{}/{} Side White.webp", self.asset_folder(), self.name()))
         }
     }
 
@@ -185,9 +185,9 @@ impl BicycleModTrait for Hat {
             return None;
         }
         if menu {
-            Some(format!("{}/{}.png", self.asset_folder(), self.name()))
+            Some(format!("{}/{}.webp", self.asset_folder(), self.name()))
         } else {
-            Some(format!("{}/{} Side.png", self.asset_folder(), self.name()))
+            Some(format!("{}/{} Side.webp", self.asset_folder(), self.name()))
         }
     }
 
@@ -196,9 +196,9 @@ impl BicycleModTrait for Hat {
             return None;
         }
         if menu {
-            Some(format!("{}/{} White.png", self.asset_folder(), self.name()))
+            Some(format!("{}/{} White.webp", self.asset_folder(), self.name()))
         } else {
-            Some(format!("{}/{} Side White.png", self.asset_folder(), self.name()))
+            Some(format!("{}/{} Side White.webp", self.asset_folder(), self.name()))
         }
     }
 

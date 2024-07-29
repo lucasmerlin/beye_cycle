@@ -132,7 +132,7 @@ pub fn fire_hook_system(
                         custom_size: Some(Vec2::new(1.0, 1.0)),
                         ..Default::default()
                     },
-                    texture: assets.load("addons/Hook.png"),
+                    texture: assets.load("addons/Hook.webp"),
                     ..Default::default()
                 },
             ));

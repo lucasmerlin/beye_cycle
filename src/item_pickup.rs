@@ -93,7 +93,7 @@ pub fn respawn_item_system(
                 .filter(|a| a != &Addon::None)
                 .choose(&mut thread_rng())
                 .unwrap();
-            *image = assets.load(format!("addons/{} Bubble.png", item.name()));
+            *image = assets.load(format!("addons/{} Bubble.webp", item.name()));
             pickup.item = Some(item);
 
             *visibility = Visibility::Visible;

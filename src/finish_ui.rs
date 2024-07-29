@@ -16,7 +16,7 @@ pub fn finish_ui(
     query: Query<(&Bicycle, &Rank, &Name, &Progress), With<Player>>,
     mut race_config: ResMut<RaceConfig>,
 ) {
-    let image = image.get_or_insert_with(|| egui.add_image(assets.load("things/Banner.png")));
+    let image = image.get_or_insert_with(|| egui.add_image(assets.load("things/Banner.webp")));
 
     Area::new(Id::new("Finish"))
         .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])

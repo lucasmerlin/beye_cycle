@@ -145,7 +145,7 @@ pub fn fire_lasso_system(
                         custom_size: Some(Vec2::new(1.0, 1.0)),
                         ..Default::default()
                     },
-                    texture: assets.load("addons/Lasso.png"),
+                    texture: assets.load("addons/Lasso.webp"),
                     ..Default::default()
                 },
             ));

@@ -106,7 +106,7 @@ pub fn spawn_poo(
         DespawnMe,
         SpriteBundle {
             transform: Transform::from_translation(bike_transform.translation() + offset),
-            texture: assets.load("things/Scheyesse.png"),
+            texture: assets.load("things/Scheyesse.webp"),
             sprite: Sprite {
                 custom_size: Some(Vec2::new(1.0, 1.0)),
                 ..Default::default()
