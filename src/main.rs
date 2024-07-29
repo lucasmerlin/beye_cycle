@@ -10,6 +10,7 @@ mod bike_config;
 mod camera;
 mod character_editor;
 mod countdown;
+mod finish_ui;
 mod game_state;
 mod item_pickup;
 mod main_menu;
@@ -24,8 +25,8 @@ use crate::addons::lasso::{FireLassoEvent, LassoPlugin};
 use crate::addons::rocket;
 use crate::bike::{spawn_bikes, BicycleParams};
 use crate::bike_config::{PlayerConfig, PlayerConfigChangedEvent};
-use crate::countdown::RaceCountdown;
-use crate::game_state::{despawn_all, GameState, RaceConfig, RaceState};
+use crate::countdown::{race_setup, RaceCountdown};
+use crate::game_state::{despawn_all, GameConfig, GameState, RaceConfig, RaceState, restart_system};
 use crate::item_pickup::ItemPickupPlugin;
 use crate::map::spawn_map_system;
 use crate::ranking::{Progress, Rank, RankingPlugin};
@@ -36,7 +37,6 @@ use bevy::asset::AssetMetaCheck;
 use bevy::prelude::*;
 use bevy::render::camera::ScalingMode;
 use bevy_egui::{EguiPlugin, EguiSettings};
-use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
 fn main() {
     App::new()
@@ -59,7 +59,6 @@ fn main() {
             PhysicsPlugins::default().with_length_unit(1.0),
             //PhysicsDebugPlugin::default(),
             EguiPlugin,
-            WorldInspectorPlugin::default(),
             GiraffePlugin,
             ItemPickupPlugin,
             RankingPlugin,
@@ -74,13 +73,18 @@ fn main() {
         .insert_state(GameState::MainMenu)
         .insert_state(RaceState::Countdown)
         .insert_resource(RaceCountdown::default())
+        .insert_resource(GameConfig::default())
         .register_type::<BicycleParams>()
         .register_type::<Rank>()
         .register_type::<Progress>()
         .register_type::<Waypoint>()
         .add_systems(
             OnEnter(GameState::Race),
-            (despawn_all, spawn_map_system, spawn_bikes).chain(),
+            (despawn_all, race_setup, spawn_map_system, spawn_bikes).chain(),
+        )
+        .add_systems(
+            OnEnter(GameState::Restart),
+            restart_system,
         )
         .add_systems(
             OnEnter(GameState::MainMenu),
@@ -98,6 +102,8 @@ fn main() {
                         rocket::despawn_rocket_system,
                     )
                         .run_if(in_state(RaceState::Playing)),
+                    (finish_ui::finish_ui.run_if(in_state(RaceState::Finished)),),
+                    finish_ui::lap_ui,
                     bike::mirror_bike_system,
                     countdown::countdown_ui,
                 )

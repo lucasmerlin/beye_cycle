@@ -1,5 +1,5 @@
-use crate::bike::Bicycle;
-use crate::game_state::GameState;
+use crate::bike::{Bicycle, Player};
+use crate::game_state::{GameState, RaceConfig, RaceState};
 use crate::waypoint::Waypoint;
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
@@ -10,8 +10,7 @@ impl Plugin for RankingPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            (track_progress_system, rank_bicycles_system, ranking_ui)
-                .run_if(in_state(GameState::Race)),
+            (track_progress_system, rank_bicycles_system, check_finish).run_if(in_state(GameState::Race).and_then(in_state(RaceState::Playing))),
         );
     }
 }
@@ -82,19 +81,14 @@ pub fn track_progress_system(
     }
 }
 
-pub fn ranking_ui(mut contexts: EguiContexts, query: Query<(&Bicycle, &Rank, &Name, &Progress)>) {
-    egui::Window::new("Ranking").show(contexts.ctx_mut(), |ui| {
-        let mut items: Vec<_> = query.iter().collect();
-        items.sort_by_key(|(_, rank, _, progress)| rank.0);
-        for (_, rank, name, progress) in items {
-            ui.label(format!(
-                "{:02}: {} - Round: {}, Checkpoint: {}, Distance to next: {:.2}",
-                rank.0,
-                name,
-                progress.round,
-                progress.checkpoint_idx,
-                progress.distance_to_next_checkpoint
-            ));
+pub fn check_finish(
+    race_config: Res<RaceConfig>,
+    mut next_race_state: ResMut<NextState<RaceState>>,
+    player_progress_query: Query<(&Player, &Progress)>,
+) {
+    if let Some((_, progress)) = player_progress_query.iter().next() {
+        if progress.round > race_config.laps {
+            next_race_state.set(RaceState::Finished);
         }
-    });
+    }
 }

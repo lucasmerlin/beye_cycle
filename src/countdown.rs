@@ -18,6 +18,12 @@ impl Default for RaceCountdown {
     }
 }
 
+pub fn race_setup(
+    mut countdown: ResMut<RaceCountdown>
+) {
+    countdown.timer.reset();
+}
+
 pub fn countdown_ui(
     assets: Res<AssetServer>,
     mut egui: EguiContexts,

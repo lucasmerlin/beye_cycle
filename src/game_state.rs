@@ -7,6 +7,8 @@ pub struct DespawnMe;
 pub enum GameState {
     MainMenu,
     Race,
+    // Utility to run race setup again
+    Restart,
 }
 
 #[derive(Debug, States, Clone, Eq, PartialEq, Hash, Default)]
@@ -23,6 +25,12 @@ pub struct RaceConfig {
     pub ai_count: usize,
     pub map: String,
     pub laps: usize,
+    pub is_cup: bool,
+}
+
+#[derive(Debug, Resource, Default)]
+pub struct GameConfig {
+    pub level_selector_unlocked: bool,
 }
 
 pub const MAPS: [&str; 3] = ["Milky Way", "Uphill Both Ways", "Pool"];
@@ -37,7 +45,8 @@ impl Default for RaceConfig {
         Self {
             ai_count: 3,
             map: MAPS[0].to_string(),
-            laps: 3,
+            laps: 1,
+            is_cup: true,
         }
     }
 }
@@ -46,4 +55,12 @@ pub fn despawn_all(mut commands: Commands, query: Query<(Entity), With<DespawnMe
     for entity in query.iter() {
         commands.entity(entity).despawn_recursive();
     }
+}
+
+pub fn restart_system(
+    mut next_state: ResMut<NextState<GameState>>,
+    mut next_race_state: ResMut<NextState<RaceState>>,
+) {
+    next_state.set(GameState::Race);
+    next_race_state.set(RaceState::Countdown);
 }

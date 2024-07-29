@@ -27,6 +27,9 @@ pub fn character_editor(ui: &mut Ui, mut player: &mut ResMut<PlayerConfig>) {
     ui.label("Back Wheel:");
     changed |= select(ui, &mut config.0.bike.rear_wheel);
 
+    ui.label("Starter Item:");
+    changed |= select(ui, &mut config.0.bike.addon);
+
     if changed {
         player.set_changed();
     }

@@ -1,12 +1,12 @@
-use std::f32::consts::PI;
 use crate::bike::{Bicycle, BicycleParams, Player};
 use crate::bike_config::PlayerConfig;
 use crate::character_editor::character_editor;
-use crate::game_state::{GameState, RaceConfig, MAPS, DespawnMe, RaceState};
+use crate::game_state::{DespawnMe, GameConfig, GameState, RaceConfig, RaceState, MAPS};
 use bevy::prelude::*;
 use bevy::render::camera::ScalingMode;
-use bevy_egui::egui::ComboBox;
+use bevy_egui::egui::{ComboBox, Visuals};
 use bevy_egui::{egui, EguiContexts};
+use std::f32::consts::PI;
 
 pub fn main_menu_ui(
     mut contexts: EguiContexts,
@@ -14,23 +14,36 @@ pub fn main_menu_ui(
     mut player_config: ResMut<PlayerConfig>,
     mut next_state: ResMut<NextState<GameState>>,
     mut next_race_state: ResMut<NextState<RaceState>>,
+    game_config: Res<GameConfig>,
 ) {
     let ctx = contexts.ctx_mut();
+    ctx.set_visuals(Visuals::light());
 
     egui::Window::new("Main Menu").show(ctx, |ui| {
         ui.heading("Main Menu");
 
         character_editor(ui, &mut player_config);
 
-        ComboBox::new("Map", "Select Map")
-            .selected_text(&race_config.map)
-            .show_ui(ui, |ui| {
-                for map in MAPS {
-                    if ui.selectable_label(race_config.map == *map, map).clicked() {
-                        race_config.map = map.to_string();
-                    }
-                }
+        ui.horizontal(|ui| {
+            ui.add_enabled_ui(game_config.level_selector_unlocked, |ui| {
+                ui.selectable_value(&mut race_config.is_cup, false, "Single").on_disabled_hover_text("Complete a cup to unlock the level selector");
             });
+            ui.selectable_value(&mut race_config.is_cup, true, "Cup");
+        });
+
+        if !race_config.is_cup {
+            ComboBox::new("Map", "Select Map")
+                .selected_text(&race_config.map)
+                .show_ui(ui, |ui| {
+                    for map in MAPS {
+                        if ui.selectable_label(race_config.map == *map, map).clicked() {
+                            race_config.map = map.to_string();
+                        }
+                    }
+                });
+        } else {
+            race_config.map = MAPS[0].to_string();
+        }
 
         if ui.button("Start Race").clicked() {
             next_state.set(GameState::Race);
@@ -53,9 +66,7 @@ pub fn setup_main_menu(mut commands: Commands, mut player_config: ResMut<PlayerC
     ));
 
     player.with_children(|commands| {
-        commands.spawn((
-            TransformBundle::default()
-        ));
+        commands.spawn((TransformBundle::default()));
     });
 
     player_config.set_changed();
