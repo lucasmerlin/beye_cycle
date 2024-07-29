@@ -136,6 +136,7 @@ pub fn poo_collision(
     mut events: EventReader<Collision>,
     poo_query: Query<(Entity, &Poo)>,
     mut bicycle_query: Query<(Entity, &Bicycle, &mut BicycleControl, &mut LinearVelocity)>,
+    assets: Res<AssetServer>,
 ) {
     for Collision(contacts) in events.read() {
         if let Some((poo, ..)) = poo_query
@@ -149,6 +150,15 @@ pub fn poo_collision(
                 commands.entity(bicycle).insert(PooCollision {
                     timer: Timer::from_seconds(0.5, TimerMode::Once),
                 });
+
+
+                commands.spawn((
+                    AudioBundle {
+                        source: assets.load("sounds/slip.mp3"),
+                        settings: PlaybackSettings::DESPAWN,
+                    }
+                ));
+
                 velocity.0 = Vec2::ZERO;
                 control.turn = 0.0;
                 control.acceleration = 0.0;
