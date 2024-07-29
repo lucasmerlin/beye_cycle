@@ -231,6 +231,15 @@ pub fn apply_config(
         BicycleMod::Skin,
         menu,
     );
+
+    spawn_selectable(
+        entity,
+        &mut container_commands,
+        &config.hat,
+        &assets,
+        BicycleMod::Hat,
+        menu,
+    );
 }
 
 pub fn spawn_selectable(

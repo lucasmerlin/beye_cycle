@@ -180,20 +180,50 @@ impl BicycleModTrait for Hat {
         "hats"
     }
 
+    fn asset(&self, menu: bool) -> Option<String> {
+        if !self.has_asset() {
+            return None;
+        }
+        if menu {
+            Some(format!("{}/{}.png", self.asset_folder(), self.name()))
+        } else {
+            Some(format!("{}/{} Side.png", self.asset_folder(), self.name()))
+        }
+    }
+
+    fn bg_asset(&self, menu: bool) -> Option<String> {
+        if !self.has_asset() {
+            return None;
+        }
+        if menu {
+            Some(format!("{}/{} White.png", self.asset_folder(), self.name()))
+        } else {
+            Some(format!("{}/{} Side White.png", self.asset_folder(), self.name()))
+        }
+    }
+
     fn has_asset(&self) -> bool {
         self != &Hat::None
     }
 
     fn asset_res(&self, menu: bool) -> Vec2 {
-        todo!()
+        if menu {
+            Vec2::new(1143.0, 1365.0)
+        } else {
+            Vec2::new(1077.0, 1175.0)
+        }
     }
 
     fn asset_offset(&self, menu: bool) -> Vec2 {
-        Vec2::ZERO
+        if menu {
+            Vec2::new(-1.5, 1.95)
+        } else {
+            Vec2::new(-1.1, -0.4)
+        }
     }
 
     fn z_order(&self) -> f32 {
-        25.0
+        30.0
     }
 }
 

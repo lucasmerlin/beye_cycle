@@ -57,6 +57,7 @@ fn main() {
             PhysicsPlugins::default().with_length_unit(1.0),
             //PhysicsDebugPlugin::default(),
             EguiPlugin,
+            WorldInspectorPlugin::default(),
             GiraffePlugin,
             ItemPickupPlugin,
             RankingPlugin,
