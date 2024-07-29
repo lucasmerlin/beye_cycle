@@ -23,7 +23,7 @@ use crate::addons::giraffe::GiraffePlugin;
 use crate::addons::hook::HookPlugin;
 use crate::addons::lasso::{FireLassoEvent, LassoPlugin};
 use crate::addons::rocket;
-use crate::bike::{spawn_bikes, BicycleParams};
+use crate::bike::{spawn_bikes, BicycleParams, apply_z_order};
 use crate::bike_config::{PlayerConfig, PlayerConfigChangedEvent};
 use crate::countdown::{race_setup, RaceCountdown};
 use crate::game_state::{despawn_all, GameConfig, GameState, RaceConfig, RaceState, restart_system};
@@ -106,6 +106,7 @@ fn main() {
                     finish_ui::lap_ui,
                     bike::mirror_bike_system,
                     countdown::countdown_ui,
+                    apply_z_order,
                 )
                     .run_if(in_state(GameState::Race)),
                 bike::apply_config_to_player.run_if(resource_changed::<PlayerConfig>),

@@ -145,7 +145,8 @@ pub fn spawn_bikes(
     for i in 0..race_config.ai_count + 1 {
         // This makes a mess but is better than bikes off the track
         let offset_i = usize::min(i, 8);
-        let offset = direction.normalize() * (offset_i as f32 * 1.4) + direction_right * (offset_i as f32 % 2.0);
+        let offset = direction.normalize() * (offset_i as f32 * 1.4)
+            + direction_right * (offset_i as f32 % 2.0);
         spawn(i == 0, offset);
     }
 }
@@ -525,5 +526,21 @@ pub fn mirror_bike_system(
                 }
             }
         }
+    }
+}
+
+/// Sets z index based on vertical position
+pub fn apply_z_order(mut query: Query<(&GlobalTransform, &mut Transform), With<ModContainer>>) {
+    let mut vec: Vec<_> = query.iter_mut().collect();
+
+    vec.sort_by(|(a, _), (b, _)| {
+        b.translation()
+            .y
+            .partial_cmp(&a.translation().y)
+            .unwrap_or(std::cmp::Ordering::Equal)
+    });
+
+    for (i, ((_, mut transform))) in vec.into_iter().enumerate() {
+        transform.translation.z = i as f32 * 50.0;
     }
 }
