@@ -22,7 +22,7 @@ impl Default for RaceCountdown {
 }
 
 pub fn race_setup(mut countdown: ResMut<RaceCountdown>) {
-    countdown.timer.reset();
+    *countdown = RaceCountdown::default()
 }
 
 pub fn countdown_ui(
