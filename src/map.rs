@@ -1,4 +1,4 @@
-use crate::game_state::DespawnMe;
+use crate::game_state::{DespawnMe, MAP_DATA, MAPS, RaceConfig};
 use crate::item_pickup::ItemPickup;
 use crate::slow::Slow;
 use crate::waypoint::Waypoint;
@@ -22,6 +22,7 @@ pub fn spawn_map_system(
     asset_server: Res<AssetServer>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     assets: ResMut<EmbeddedAssetRegistry>,
+    race_config: Res<RaceConfig>,
 ) {
     // let texture_handle = asset_server.load("map.png");
     // let transform = Transform::from_scale(Vec3::splat(1.0 / 20.0));
@@ -31,7 +32,13 @@ pub fn spawn_map_system(
     //     ..Default::default()
     // });
 
-    let map = include_str!("../assets/maps/Uphill Both Ways.svg");
+    let map_idx = MAPS
+        .iter()
+        .position(|map| map == &race_config.map)
+        .unwrap_or(0);
+
+    let map = MAP_DATA[map_idx];
+
     let svg = svg::read(map).unwrap();
 
     //let mut view_box = None;

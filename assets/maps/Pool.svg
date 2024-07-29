@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="0 0 60 60" width="60" height="60" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs/>
+  <image width="60" height="60" class="collider" xlink:href="Pool.webp"/>
+  <circle style="fill: rgb(107, 218, 85); transform-origin: 31.898px 15.884px;" cx="31.898" cy="15.884" r="0.198" class="pickup"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="16.782 23.844 17.108 23.24 19.774 21.945 22.698 20.995 24.662 20.501 27.684 20.021 30.144 19.784 33.017 19.746 36.013 19.866 38.035 20.151 38.934 20.305 40.25 20.89 41.901 21.779 42.658 22.765 42.145 25.156 41.792 28.29 41.627 31.314 41.921 33.602 41.248 35.446 39.123 36.207 36.027 37.088 32.948 37.432 29.821 37.551 26.016 37.379 23.568 37.262 21.487 36.934 19.182 36.205 17.431 35.606 16.921 34.545 17.151 33.435 17.651 31.405 17.729 29.654 17.531 27.667 17.136 25.627" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="10.701 35.548 12.16 37.916 13.86 39.267 16.225 40.402 19.371 41.528 23.733 42.356 27.994 42.677 32.062 42.507 35.573 42.133 38.959 41.549 42.293 40.548 45.187 39.171 47.133 37.928 48.136 36.912 48.386 36.325 48.498 35.742 48.49 35.075 48.207 34.699 47.693 34.141 47.087 32.924 46.768 31.299 46.686 29.366 46.869 27.537 47.254 25.959 47.672 24.628 48.369 23.234 48.927 22.243 49.043 21.245 48.867 20.442 48.466 19.96 47.913 19.443 46.847 18.761 45.551 18.021 43.211 17.174 41.249 16.484 38.489 15.93 36.09 15.502 32.934 15.299 29.898 15.208 27.086 15.392 24.377 15.699 21.908 16.19 19.359 16.936 17.326 17.743 15.12 19.002 13.556 20.142 12.173 21.539 11.6 22.392 11.294 23.308 11.398 24.122 11.668 24.665 12 25.121 12.384 26.223 12.83 27.886 13.027 29.661 13.005 31.665 12.837 32.919 12.644 33.479 12.217 33.845 11.64 34.526 11.356 35.624 12.069 38.626 -3.26 38.239 -2.032 -3.661 63.464 -2.716 62.623 62.033 -1.638 61.477 -1.432 35.689" class="collider"/>
+  <polygon style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2px;" points="23.916 18.171 31.372 16.469 36.888 16.68 41.079 17.504 43.624 22.501 46.057 31.955 38.698 37.9 24.322 40.648 18.083 39.712 13.708 31.667 13.171 26.294 17.952 21.005" id="track"/>
+  <circle style="fill: rgb(107, 218, 85); transform-origin: 31.974px 16.938px;" cx="31.974" cy="16.938" r="0.198" class="pickup"/>
+  <circle style="fill: rgb(107, 218, 85); transform-origin: 31.995px 17.69px;" cx="31.995" cy="17.69" r="0.198" class="pickup"/>
+  <circle style="fill: rgb(107, 218, 85); transform-origin: 32.082px 18.708px;" cx="32.082" cy="18.708" r="0.198" class="pickup"/>
+  <circle style="fill: rgb(107, 218, 85); transform-origin: 40.608px 16.877px;" cx="40.608" cy="16.877" r="0.198" class="pickup"/>
+  <circle style="fill: rgb(107, 218, 85); transform-origin: 40.452px 17.829px;" cx="40.452" cy="17.829" r="0.198" class="pickup"/>
+  <circle style="fill: rgb(107, 218, 85); transform-origin: 40.271px 18.689px;" cx="40.271" cy="18.689" r="0.198" class="pickup"/>
+  <circle style="fill: rgb(107, 218, 85); transform-origin: 40.087px 19.635px;" cx="40.087" cy="19.635" r="0.198" class="pickup"/>
+  <circle style="fill: rgb(107, 218, 85); transform-origin: 39.912px 40.306px;" cx="39.912" cy="40.306" r="0.198" class="pickup"/>
+  <circle style="fill: rgb(107, 218, 85); transform-origin: 39.3px 39.199px;" cx="39.3" cy="39.199" r="0.198" class="pickup"/>
+  <circle style="fill: rgb(107, 218, 85); transform-origin: 38.829px 38.324px;" cx="38.829" cy="38.324" r="0.198" class="pickup"/>
+  <circle style="fill: rgb(107, 218, 85); transform-origin: 38.375px 37.258px;" cx="38.375" cy="37.258" r="0.198" class="pickup"/>
+  <circle style="fill: rgb(107, 218, 85); transform-origin: 16.643px 33.089px;" cx="16.643" cy="33.089" r="0.198" class="pickup"/>
+  <circle style="fill: rgb(107, 218, 85); transform-origin: 15.742px 32.891px;" cx="15.742" cy="32.891" r="0.198" class="pickup"/>
+  <circle style="fill: rgb(107, 218, 85); transform-origin: 14.69px 32.715px;" cx="14.69" cy="32.715" r="0.198" class="pickup"/>
+  <circle style="fill: rgb(107, 218, 85); transform-origin: 13.612px 32.587px;" cx="13.612" cy="32.587" r="0.198" class="pickup"/>
+</svg>

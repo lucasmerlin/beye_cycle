@@ -16,7 +16,12 @@ pub struct RaceConfig {
     pub laps: usize,
 }
 
-pub const MAPS: [&str; 2] = ["Milky Way", "Uphill Both Ways"];
+pub const MAPS: [&str; 3] = ["Milky Way", "Uphill Both Ways", "Pool"];
+pub const MAP_DATA: [&str; 3] = [
+    include_str!("../assets/maps/Milky Way.svg"),
+    include_str!("../assets/maps/Uphill Both Ways.svg"),
+    include_str!("../assets/maps/Pool.svg"),
+];
 
 impl Default for RaceConfig {
     fn default() -> Self {
